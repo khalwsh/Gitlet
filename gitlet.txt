@@ -1,0 +1,97 @@
+Main Functionality that Gitlet supports is:
+1) Saving the contents of entire directories of files. In Gitlet, this is called committing
+, and the saved contents themselves are called commits.
+2) Restoring a version of one or more files or entire commits. In Gitlet, this is called checking out those files or that commit.
+
+3) Viewing the history of your backups. In Gitlet, you view this history in something called the log.
+
+4) Maintaining related sequences of commits, called branches.
+
+5) Merging changes made in one branch into another.
+
+- commit ---> snapshot of the entire project.
+- head ---> keep track where are we in the linked list
+- blobs ---> The saved contents of files. 
+- trees ---> Directory structures mapping names to references to blob and other trees.
+
+- in gitlet we deal with flat directory not.
+- merge only 2 branches.
+- metadata consist only of a timestamp and log message.
+- commit will consists of a log message , timestamp , mapping of file names to blob ref
+, a parent reference , and a second parent ref (in case of merges).
+
+hash --> we will be using SHA-1
+
+note: metadata and references will be included when hashing.
+distinguishe between hashes for commits and hashes for blobs.
+-------------
+commands
+------------------------- init [no args]
+
+it creates empty repo starts with on e commit , create single branch (master) which
+points to the inital commit, initial commit will be 00:00:00 UTC, Thursday 1 jan 1970
+if already there is a version-control system in the current directory it should abort.
+error message:A Gitlet version-control system already exists in the current directory.
+
+------------------------- add [files names]
+
+it add copy from the files to the staging area [don't stage what is already doesn't changed 
+and remove it from the staging area of it was there already].
+Failure cases: If the file does not exist, print the error message File does not exist. and exit without changing anything.
+
+------------------------- commit [message]
+
+ // note the should be in one arg like "added to the file..." 
+Saves a snapshot of tracked files in the current commit.
+staging area is cleard after a commit.
+after staging the files should be tracked even if they are deleted.
+After the commitjust made a new node added to the commit tree and head point to it.
+commit recieve a message.
+
+Failure cases: If no files have been staged, abort.
+Print the message No changes added to the commit.
+Every commit must have a non-blank message. 
+If it doesn’t, print the error message Please enter a commit message.
+It is not a failure for tracked files to be missing from the working directory 
+or changed in the working directory. 
+Just ignore everything outside the .gitlet directory entirely.
+
+------------------------- rm [file name]
+Unstage the file if it is currenlty staged for addition. 
+If the file is tracked in the current commit, 
+stage it for removal and remove the file from the working directory 
+if the user has not already done so 
+(do not remove it unless it is tracked in the current commit).
+failure:
+If the file is neither staged nor tracked by the head commit, print the error message No reason to remove the file.
+
+------------------------- log
+Starting from the commit head points to, display information about each commit backwards
+following the parent link until the initial commit, ignoring any second parents found
+what to show? - commit hash , date , commit message
+=== before each commit and empty line after it
+for merge commits add line---> Merge: parent1 hash  parent2 hash  [only 7 digits]
+
+------------------------- global-log
+like log but show all commits ever made.
+------------------------- find [commit message]
+prints out the ids of all commits that have the given commit message on sperate lines.
+// note we can use global-log like calling global-log and sends filter.
+failure: found no commit with that message.
+------------------------- status
+=== Branches ===
+print branche name
+
+=== Staged Files ===
+print names of the files at stage area
+
+=== Removed Files ===
+print names of the files was in the last commit and no more exist
+
+=== Modifications not Staged For commit ===
+Files was in the last commit and sha hash changed
+
+=== untracked files ===
+Files in the directory and not staged yet and not in the last commit
+
+=== checkout === 
