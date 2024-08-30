@@ -1,18 +1,30 @@
-Main Functionality that Gitlet supports is:
+1- General Notes
 1) Saving the contents of entire directories of files. In Gitlet, this is called committing
 , and the saved contents themselves are called commits.
 2) Restoring a version of one or more files or entire commits. In Gitlet, this is called checking out those files or that commit.
-
 3) Viewing the history of your backups. In Gitlet, you view this history in something called the log.
-
 4) Maintaining related sequences of commits, called branches.
-
 5) Merging changes made in one branch into another.
+6) A branch is a pointer to commit.
+7) The head points to tha active branch.
+8) When we commit only the active branch and head pointers only moves. 
 
-- commit ---> snapshot of the entire project.
+2- Definitions
+- commit ---> A commit represents a snapshot of the entire repository at a specific point in time. 
+This snapshot includes the state of all files and directories, 
+and each commit essentially captures the changes made to all files in the repository since the last commit, each commit has it is SHA-1 hash identifies it.
+
+- Branch---> A branch in Git is essentially a pointer to a specific commit. Branches are not copies of your files; they are just references (pointers) to a commit.
 - head ---> keep track where are we in the linked list
-- blobs ---> The saved contents of files. 
+- blobs ---> The saved contents of files and it is identified by SHA-1 hash of the content. 
 - trees ---> Directory structures mapping names to references to blob and other trees.
+- Staging Area:
+  1-Temporary Workspace: The staging area is a temporary space for preparing commits and is cleared after committing.
+  2-Persistence Across Sessions: The state of the staging area is indeed retained across terminal sessions and system reboots, allowing you to continue working with your staged changes.
+- Working Directory: 
+the directory where your project files are currently located. This is the top-level directory of your project,
+ which contains all the files and directories you are actively working on.
+
 
 - in gitlet we deal with flat directory not.
 - merge only 2 branches.
@@ -25,7 +37,7 @@ hash --> we will be using SHA-1
 note: metadata and references will be included when hashing.
 distinguishe between hashes for commits and hashes for blobs.
 -------------
-commands
+3- Commands
 ------------------------- init [no args]
 
 it creates empty repo starts with on e commit , create single branch (master) which
@@ -34,10 +46,20 @@ if already there is a version-control system in the current directory it should 
 error message:A Gitlet version-control system already exists in the current directory.
 
 ------------------------- add [files names]
-
-it add copy from the files to the staging area [don't stage what is already doesn't changed 
-and remove it from the staging area of it was there already].
-Failure cases: If the file does not exist, print the error message File does not exist. and exit without changing anything.
+-purpose: Adds a copy from the file to staging area(index).
+-implementation:
+  1- Check for changes:
+    -Git compares the current content of the file with the content of the blob stored in the index(staging area) using SHA 1 hash of both.
+    -If the contents are identical, Git recognizes that there is no need to create a new blob.
+  2- Index(Staging area) update:
+    -If the file is unchanged, git add does not alter the index for that file. The existing blob in the index remains the same.
+  3- Blob creation:
+    -New blobs are only created if the file content changes. If the file’s content is different from the current blob’s content, 
+    Git creates a new blob with the updated content and updates the index.
+-Edge Cases:
+ 1- don't stage what is already doesn't changed 
+ 2- don't remove it from the staging area of it was there already
+ 3- If the file does not exist, print the error message File does not exist. and exit without changing anything.
 
 ------------------------- commit [message]
 
@@ -66,21 +88,30 @@ failure:
 If the file is neither staged nor tracked by the head commit, print the error message No reason to remove the file.
 
 ------------------------- log
+-purpose: Shows the commit history of the currently checked-out branch.
+-implementation:
 Starting from the commit head points to, display information about each commit backwards
 following the parent link until the initial commit, ignoring any second parents found
 what to show? - commit hash , date , commit message
 === before each commit and empty line after it
 for merge commits add line---> Merge: parent1 hash  parent2 hash  [only 7 digits]
+-Edge cases:
 
 ------------------------- global-log
-like log but show all commits ever made.
+-purpose:like log but show all commits ever made.
+-implementation: traverse all the tree of commits.
+-Edge cases: 
+
+
 ------------------------- find [commit message]
-prints out the ids of all commits that have the given commit message on sperate lines.
-// note we can use global-log like calling global-log and sends filter.
-failure: found no commit with that message.
+-purpose: prints out the ids of all commits that have the given commit message on sperate lines.
+-implementation:
+-Edge Casess: found no commit with that message prints the error message "Found no commit with that message".
+-notes: we can use global-log like calling global-log and sends filter.
+
 ------------------------- status
 === Branches ===
-print branche name
+print branch name
 
 === Staged Files ===
 print names of the files at stage area
@@ -92,6 +123,49 @@ print names of the files was in the last commit and no more exist
 Files was in the last commit and sha hash changed
 
 === untracked files ===
-Files in the directory and not staged yet and not in the last commit
+Files in the directory and not staged yet and not in the last commit.
 
-=== checkout === 
+------------------------- branch [branch_name]
+-purpose: to create a new branch.
+-implementation: it creats new branch (pointer) and make it point to the same commit that the head refers to.
+-Edge cases:
+  1- if new branch already exist show message error  "A branch named 'branch_name' already exists."
+
+------------------------- checkout
+-purpose:
+ 1-java gitlet.Main checkout -- [file name]
+  -Takes the version of the file as it exists in the head commit and puts it in the working directory, 
+  overwriting the version of the file that’s already there if there is one. The new version of the file is not staged.
+ 
+ 2-java gitlet.Main checkout [commit id] -- [file name]
+  - to update a specific file in the working directory to its state from a particular commit
+
+ 3-java gitlet.Main checkout [branch name]
+  - Takes all files in the commit at the head of the given branch, and puts them in the working directory, 
+  overwriting the versions of the files that are already there if they exist. Also, at the end of this command, the given branch will now be considered the current branch (HEAD). Any files that are tracked in the current branch but are not present in the checked-out branch are deleted. 
+  The staging area is cleared, unless the checked-out branch is the current branch
+
+-----------------visualization of how directories managed
+.gitlet/
+│
+├── objects/                     # Stores Git objects (blobs, trees, commits)
+│   ├── <hash1>                  # e.g., blob or tree or commit object with unique hash
+│   ├── <hash2>                  # Another object
+│   └── ...                      # More objects
+│
+├── refs/
+│   ├── heads/                   # Branch references
+│   │   ├── main                 # Points to the latest commit of the 'main' branch
+│   │   └── feature-branch       # Points to the latest commit of a 'feature-branch'
+│   │
+│   └── tags/                    # Tag references (optional)
+│       └── v1.0                 # Points to the commit for tag 'v1.0'
+│
+├── logs/                        # (Optional) Logs of operations
+│   ├── commit.log               # Logs of commit operations
+│   └── checkout.log             # Logs of checkout operations
+│
+├── HEAD                         # Points to the current branch or commit
+├── index                        # Staging area (tracks changes to be committed)
+└── config                       # Repository configuration (user settings, etc.)
+
