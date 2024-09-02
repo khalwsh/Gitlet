@@ -8,7 +8,7 @@
 6) A branch is a pointer to commit.
 7) The head points to tha active branch.
 8) When we commit only the active branch and head pointers only moves. 
-
+9) commit id --> first 7 chars in the sha1-hash
 2- Definitions
 - commit ---> A commit represents a snapshot of the entire repository at a specific point in time. 
 This snapshot includes the state of all files and directories, 
@@ -144,7 +144,35 @@ Files in the directory and not staged yet and not in the last commit.
   - Takes all files in the commit at the head of the given branch, and puts them in the working directory, 
   overwriting the versions of the files that are already there if they exist. Also, at the end of this command, the given branch will now be considered the current branch (HEAD). Any files that are tracked in the current branch but are not present in the checked-out branch are deleted. 
   The staging area is cleared, unless the checked-out branch is the current branch
-
+- Edeg cases:
+1- if the file doesn't exist or the commit id print not exist
+2- if the no brach name like that print not exist , if it was the current branch
+print no need to checkout.
+------------------------- branch
+-purpose: 
+  1- java gitlet.Main brach [branch name]
+  2- creates a new branch and pooints it at the current head commit.
+- implementation:
+  1- branch consists of name for a reference , sha-1 identifier , commit node
+  2- just create the branch don't move to it.
+  3- it creates a pointer looking to where you created the branch
+  4- when checkout to the branch we move the head.
+- Failure:
+  - if a branch already exist print error message "already exists".
+------------------------- rm-branch
+- purpose:
+  1- java gitlet.Main rm-branch [branch name]
+  2- deletes the branch with the given name.
+  3- it deletes the pointer but you leave the commits.
+- edge cases:
+  1- if the branch doesn't exists print "not exists".
+  2- if the deleted branch is the current one you can't delete it
+------------------------- reset
+- purpose:
+  1- java gitlet.Main reset [commit id]
+- implemntation:
+  1- it remove all the files that not tracked by the given commit
+  2- move the head to the commit node. 
 -----------------visualization of how directories managed
 .gitlet/
 │
