@@ -175,6 +175,24 @@ print no need to checkout.
 - implemntation:
   1- it remove all the files that not tracked by the given commit
   2- move the head to the commit node. 
+------------------------- merge
+- purpose:
+  1- java gitlet.Main merge [branch name]
+  2- merges files from the given branch into the current branch
+- implemntation
+  - get the current LCA of the 2 branches and check that the lca is different commit.
+  - Any files that have been modified in the given branch since the split point,
+     but not modified in the current branch since the split point should be changed to their versions
+     in the given branch (checked out from the commit at the front of the given branch).
+     These files should then all be automatically staged.
+     To clarify, if a file is “modified in the given branch since the split point”
+     this means the version of the file as it exists in the commit at the front of the given
+     branch has different content from the version of the file at the split point.
+   - Any files that have been modified in the current branch but not in the given branch since the split point
+     should stay as they are.
+   - files exists at same branches remain , or files removed.
+   - any file exist in only one branch stay
+
 -----------------visualization of how directories managed
 .gitlet/
 │
