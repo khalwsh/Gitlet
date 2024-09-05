@@ -9,6 +9,8 @@
 7) The head points to tha active branch.
 8) When we commit only the active branch and head pointers only moves. 
 9) commit id --> first 7 chars in the sha1-hash
+10) If an object has a SHA-1 hash of 5d6ede0a1e4e5c8cba2b73a8c7c3a2bf7aeda64b, it would be stored in: .git/objects/5d/6ede0a1e4e5c8cba2b73a8c7c3a2bf7aeda64b
+and types of objects are blob, commit, tree, tag
 2- Definitions
 - commit ---> A commit represents a snapshot of the entire repository at a specific point in time. 
 This snapshot includes the state of all files and directories, 
