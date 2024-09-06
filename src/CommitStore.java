@@ -1,4 +1,4 @@
-
+import java.io.IOException;
 import java.io.File;
 public class CommitStore {
     private final File Commits_Dir;
@@ -17,9 +17,12 @@ public class CommitStore {
         if(commitHash ==null) return null;
         File currentCommitFile=Utils.join(Commits_Dir, commitHash);
         
-        if(currentCommitFile.exists())
+       //////java.lang.IllegalArgumentException here
+            if(currentCommitFile.exists())
             return Utils.readObject(currentCommitFile, Commit.class);
-        
+            
             return null;
+        
        }
+
 }
