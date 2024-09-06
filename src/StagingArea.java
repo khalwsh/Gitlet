@@ -15,13 +15,13 @@ public class StagingArea  {
     {
      
         File file=Utils.join(this.Addition_Dir, targetedNameFile);
-        if (!file.exists()) {
+        
           try {
               file.createNewFile();
           } catch (IOException e) {
               System.out.println("Error creating file: " + e.getMessage());
           }
-      }
+      
              
    String fileContent = Utils.readContentsAsString(file);
         return fileContent.equals(blobHash);
@@ -32,12 +32,32 @@ public class StagingArea  {
            File file=Utils.join(this.Addition_Dir, fileName);
            Utils.writeContents(file, hash);
   }
-  public boolean unstageForRemoval(String fileName) {
+  public void UnStageForAddittion(String fileName)
+  {
+    File file=Utils.join(Addition_Dir, fileName);
+    file.delete();
+  }
+  /////add version of file from last commit to Staged/removal dir
+  public void StageForRemoval(String fileName,String hash)
+  {
+ File file=Utils.join(Removal_Dir, fileName);
+      Utils.writeContents(file, hash);
+  }
+  public boolean unstageForRemoval(String fileName) 
+  {
     File file =Utils. join(Removal_Dir, fileName);
 
     if (file == null) return false;
     return file.delete();
-}
+     
+  }
+      
+      
+      public boolean CheckFileStagedForAddition(String fileName)
+      {
+                  File file=Utils.join(Addition_Dir, fileName);
+                  return file.exists();
+      }
 
   
 }

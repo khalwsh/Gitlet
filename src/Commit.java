@@ -36,6 +36,21 @@ public class Commit  implements Serializable{
               
           }
           public String getCommitHash(){return currentHash;}
+          public String getParentCommitHash(){return parentHash;}
           public Map<String,String>trackedFiles() {return trackedFiles;}
+
+            @Override
+          public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("commit ").append(currentHash).append("\n");
+        sb.append("Date: ").append(timeStamp.toString()).append("\n");
+        sb.append(message).append("\n");
+
+        // Add an empty line after the commit message
+        sb.append("\n");
+
+        return sb.toString();
+    }
+          
           
 }
