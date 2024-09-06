@@ -1,10 +1,9 @@
 public class Main {
     public static void main(String[] args) {
-     
-    
         if(args.length==0)
         {
             Utils.exitWithMessage("Please Enter command.");
+            System.exit(0);// we need to exit in this case.
         }
         String command=args[0],message,fileName,branchName;
         
