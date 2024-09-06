@@ -2,10 +2,10 @@ public class Main {
     public static void main(String[] args) {
      
     
-        // if(args.length==0)
-        // {
-        //     Utils.exitWithMessage("Please Enter command.");
-        // }
+        if(args.length==0)
+        {
+            Utils.exitWithMessage("Please Enter command.");
+        }
         String command="log",message,fileName,branchName;
         
         Repository repository=new Repository(System.getProperty("user.dir"));
@@ -13,7 +13,7 @@ public class Main {
 
        switch (command) {
         case "init":
-           // ValidateArgs(0, args.length-1);
+            ValidateArgs(0, args.length-1);
             
             repository.init();
 
@@ -21,7 +21,7 @@ public class Main {
         
         case "add":
         
-        //ValidateArgs(1, args.length-1);
+        ValidateArgs(1, args.length-1);
         repository.add("file.txt");
         
         break;
@@ -42,7 +42,10 @@ public class Main {
          repository.log();
 
          break;
-        
+        case"commit":
+         ValidateArgs(1, args.length-1);
+         repository.commit(args[1]);
+         break;
          default:
             break;
        }
