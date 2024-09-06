@@ -3,11 +3,11 @@ public class Main {
     public static void main(String[] args) {
      
     
-        // if(args.length==0)
-        // {
-        //     Utils.exitWithMessage("Please Enter command.");
-        // }
-        String command="log",message,fileName,branchName;
+        if(args.length==0)
+        {
+            Utils.exitWithMessage("Please Enter command.");
+        }
+        String command=args[0],message,fileName,branchName;
         
         Repository repository=new Repository(System.getProperty("user.dir"));
         
@@ -23,7 +23,7 @@ public class Main {
         case "add":
         
         ValidateArgs(1, args.length-1);
-        repository.add("file.txt");
+        repository.add(args[1]);
         
         break;
         
@@ -33,13 +33,13 @@ public class Main {
         case "rm":
          
         ValidateArgs(1, args.length-1);
-        repository.rm("file.txt");
+        repository.rm(args[1]);
         
         break;
         
         
         case "log":
-        //ValidateArgs(0, args.length-1);
+        ValidateArgs(0, args.length-1);
          repository.log();
 
          break;

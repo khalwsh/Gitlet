@@ -1,4 +1,3 @@
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -153,21 +152,27 @@ public class Repository {
 
 
   public void commit(String Message, String SecondParentHash) {
-      if (Message.isEmpty()) Utils.exitWithMessage("you have to enter a commit message");
+      
+    if (Message.isEmpty()) Utils.exitWithMessage("you have to enter a commit message");
       if (stagingArea.IsEmpty()) Utils.exitWithMessage("nothing to commit");
-      String CurBranchName = Utils.readContentsAsString(Head_file);
-      Branch CurBranch = branchStore.getBranch(CurBranchName);
-      String CurCommitHash = CurBranch.getReferredCommitHash();
+      
+      
+      String CurCommitHash = getCurrentCommit().getCommitHash();
+      
       Map<String , String> trackedFiles = commitStore.getCommit(CurCommitHash).trackedFiles();
+      
       for(File f : stagingArea.GetFilesForAddition()){
-          String BlobStored = blobStore.saveBlob(f);
+          String BlobStored = Utils.readContentsAsString(f);
           trackedFiles.put(f.getName() , BlobStored);
       }
       for(File f: stagingArea.GetFilesForRemoval()){
           trackedFiles.remove(f.getName());
       }
+      
       Commit NewCommit = new Commit(new Date(), Message, SecondParentHash,CurCommitHash, trackedFiles);
       commitStore.saveCommit(NewCommit);
+      
+      Branch CurBranch=getCurrentBranch();
       CurBranch.SetCommit(NewCommit.getCommitHash());
       branchStore.saveBranch(CurBranch);
       stagingArea.clear();
