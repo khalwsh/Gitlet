@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.util.ArrayList;
 public class BranchStore {
     private final File Branches_Dir;
 
@@ -17,5 +18,20 @@ public class BranchStore {
         File branchFile = Utils.join(Branches_Dir, branchName);
         if (!branchFile.exists()) return null;
         return Utils.readObject(branchFile, Branch.class);
+       }
+       public ArrayList<Commit> getBranchHistory(Commit currCommit, CommitStore commitStore)
+       {
+                ArrayList<Commit>listOfCommits=new ArrayList<Commit>();
+                
+                    listOfCommits.add(currCommit);
+                  while (currCommit.getParentCommitHash()!=null) {
+
+                    String prevCommitHash=currCommit.getParentCommitHash();
+                    Commit prevCommit=commitStore.getCommit(prevCommitHash);
+                    listOfCommits.add(prevCommit);
+                    currCommit=prevCommit;
+                  }
+                  
+                return listOfCommits;
        }
 }

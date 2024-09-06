@@ -10,4 +10,9 @@ public class WorkingArea {
         File targetFile=Utils.join(Working_Dir,fileName);
         return targetFile.exists()? targetFile:null;
     }
+    public void removeFromCWD(String fileName)
+    {
+      File file=Utils.join(Working_Dir, fileName);
+      if(file.exists()) file.delete();
+    }
 }

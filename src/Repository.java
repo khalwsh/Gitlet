@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
@@ -95,6 +96,50 @@ public class Repository {
 
         stagingArea.unstageForRemoval(fileName);
     }
+
+    public void rm(String fileName)
+    {
+    //check gitlet repo existence
+    checkGitletExistense();
+        
+      boolean checkFileStagedForAddition=stagingArea.CheckFileStagedForAddition(fileName);
+      
+   
+        //check if file tracked or not
+        String fileHash=getCurrentCommit().trackedFiles().get(fileName);
+        if(fileHash==null) //untracked
+        {
+          if(checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
+          else System.out.println("No reason to remove the file."); //untracked and not staged for addition
+        }
+        else
+        {
+          if(checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
+            ///add last commited file version to staged for removal 
+            stagingArea.StageForRemoval(fileName, fileHash);
+            ///remove current file version form CWD
+             workingArea.removeFromCWD(fileName);
+        }
+
+    }
+
+     public void log()
+     {
+         //check gitlet repo existence
+    checkGitletExistense();
+    //get current commit
+    Commit curCommit=getCurrentCommit();
+     ArrayList<Commit>listOfCommits= branchStore.getBranchHistory(curCommit,commitStore);
+      for(int i=0;i<listOfCommits.size();i++)
+      {
+        System.out.println("===");
+        System.out.println(listOfCommits.get(i));
+      }
+     
+    }
+
+
+
     private void checkGitletExistense() {
       if (!Gitlet_Dir.exists()) {
           Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
@@ -127,5 +172,17 @@ public class Repository {
       branchStore.saveBranch(CurBranch);
       stagingArea.clear();
   }
+  //get active branch
+  private Branch getCurrentBranch() 
+  { 
+    return branchStore.getBranch(head.getHead());
+  }
+//get current commit refered to by active branch
+private Commit getCurrentCommit()
+{
+  String curCommitHash=getCurrentBranch().getReferredCommitHash();
+return commitStore.getCommit(curCommitHash);
+}
+
 
 }
