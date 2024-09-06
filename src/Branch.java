@@ -16,4 +16,7 @@ public class Branch implements Serializable{
      {
               return this.referredCommitHash;
      }
+     public void SetCommit(String commitHash){
+         this.referredCommitHash = commitHash;
+     }
 }
