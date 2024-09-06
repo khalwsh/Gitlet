@@ -2,10 +2,10 @@ public class Main {
     public static void main(String[] args) {
      
     
-        if(args.length==0)
-        {
-            Utils.exitWithMessage("Please Enter command.");
-        }
+        // if(args.length==0)
+        // {
+        //     Utils.exitWithMessage("Please Enter command.");
+        // }
         String command="log",message,fileName,branchName;
         
         Repository repository=new Repository(System.getProperty("user.dir"));
