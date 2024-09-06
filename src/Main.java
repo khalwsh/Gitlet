@@ -1,38 +1,42 @@
 public class Main {
     public static void main(String[] args) {
-        if(args.length==0)
-        {
+        if (args.length == 0) {
             Utils.exitWithMessage("Please Enter command.");
-            System.exit(0);// we need to exit in this case.
         }
-        String command=args[0],message,fileName,branchName;
-        
-        Repository repository=new Repository(System.getProperty("user.dir"));
-        
+        String command = args[0], message, fileName, branchName;
 
-       switch (command) {
-        case "init":
-            ValidateArgs(0, args.length-1);
-            
-            repository.init();
+        Repository repository = new Repository(System.getProperty("user.dir"));
 
-        break;
-        
-        case "add":
-        
-        ValidateArgs(1, args.length-1);
-        repository.add(args[1]);
-        
-        break;
 
-        default:
-            break;
-       }
-           
+        switch (command) {
+            case "init":
+                ValidateArgs(0, args.length - 1);
+
+                repository.init();
+
+                break;
+
+            case "add":
+
+                ValidateArgs(1, args.length - 1);
+                repository.add(args[1]);
+
+                break;
+
+            case "commit":
+
+                ValidateArgs(1 , args.length - 1);
+                repository.commit(args[1]);
+
+                break;
+
+            default:
+                break;
+        }
+
     }
     private static void ValidateArgs(int n,int argsLength)
     {
         if(argsLength!=n)  Utils.exitWithMessage("Incorrect Operands");
-          
     }
 }
