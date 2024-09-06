@@ -110,7 +110,6 @@ public class Repository {
   public void commit(String Message, String SecondParentHash) {
       if (Message.isEmpty()) Utils.exitWithMessage("you have to enter a commit message");
       if (stagingArea.IsEmpty()) Utils.exitWithMessage("nothing to commit");
-      Map<String , String>TrackedFilesInTheCurrentCommit = new TreeMap<>();
       String CurBranchName = Utils.readContentsAsString(Head_file);
       Branch CurBranch = branchStore.getBranch(CurBranchName);
       String CurCommitHash = CurBranch.getReferredCommitHash();
@@ -122,7 +121,7 @@ public class Repository {
       for(File f: stagingArea.GetFilesForRemoval()){
           trackedFiles.remove(f.getName());
       }
-      Commit NewCommit = new Commit(new Date(0), Message, SecondParentHash,CurCommitHash, trackedFiles);
+      Commit NewCommit = new Commit(new Date(), Message, SecondParentHash,CurCommitHash, trackedFiles);
       commitStore.saveCommit(NewCommit);
       CurBranch.SetCommit(NewCommit.getCommitHash());
       branchStore.saveBranch(CurBranch);
