@@ -51,6 +51,5 @@ public class Main {
     private static void ValidateArgs(int n,int argsLength)
     {
         if(argsLength!=n)  Utils.exitWithMessage("Incorrect Operands");
-          
     }
 }
