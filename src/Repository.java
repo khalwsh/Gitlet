@@ -1,7 +1,9 @@
 
 import java.io.File;
 import java.util.Date;
-
+import java.util.List;
+import java.util.TreeMap;
+import java.util.Map;
 public class Repository {
     private final File CWD;
     private final File Gitlet_Dir;
@@ -43,31 +45,28 @@ public class Repository {
             head=new Head(Head_file);
     }
    
-    public void init()
-    {
-        if(Gitlet_Dir.exists()) Utils.exitWithMessage("Gitlet Repository already exists in current working directory");
+    public void init() {
+        if (Gitlet_Dir.exists()) Utils.exitWithMessage("Gitlet Repository already exists in current working directory");
 
-          Gitlet_Dir.mkdir();
-          Blobs_Dir.mkdir();
-          Commits_Dir.mkdir();
-          Staged_Dir.mkdir();
-          Addition_Dir.mkdir();
-          Removal_Dir.mkdir();
-          Branches_Dir.mkdir();
+        Gitlet_Dir.mkdir();
+        Blobs_Dir.mkdir();
+        Commits_Dir.mkdir();
+        Staged_Dir.mkdir();
+        Addition_Dir.mkdir();
+        Removal_Dir.mkdir();
+        Branches_Dir.mkdir();
 
-          try{
+        try {
             Head_file.createNewFile();
-          }
-          catch(java.io.IOException ex)
-          {
-                   Utils.exitWithMessage(ex.getMessage());
-          }
-          Commit commit=new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet 
-          // start with initial commit with message "initial commit" and timestamp=Unix epoch  
-          commitStore.saveCommit(commit);   
-          Branch master=new Branch("master", commit.getCommitHash());// create master branch
+        } catch (java.io.IOException ex) {
+            Utils.exitWithMessage(ex.getMessage());
+        }
+        Commit commit = new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet
+        // start with initial commit with message "initial commit" and timestamp=Unix epoch
+        commitStore.saveCommit(commit);
+        Branch master = new Branch("master", commit.getCommitHash());// create master branch
         branchStore.saveBranch(master);
-          head.setHead(master); //set head to point to master
+        head.setHead(master); //set head to point to master
     }
   
 ///If the file in the working directory is different from the file in the staging area:
@@ -75,46 +74,59 @@ public class Repository {
 //The staging area is updated to reference this new blob, meaning the new content will be included in the next commit.
 //If the file in the working directory is the same as the file in the staging area:
 //No new blob is created, and the file is not updated in the staging area. The staging area already has the correct content, so there is no need to re-stage the file.
+    public void add(String fileName) {
+        //check gitlet repo existence
+        checkGitletExistense();
+        //check file existense
+        File currentFile = workingArea.checkFileExistense(fileName);
+        if (currentFile == null) Utils.exitWithMessage("File doesn't exist");
 
-    public void add(String fileName)
-    {
-                 //check gitlet repo existence
-                checkGitletExistense();
-              //check file existense 
-            File currentFile=workingArea.checkFileExistense(fileName);
-            if(currentFile==null) Utils.exitWithMessage("File doesn't exist");
-              
-             
-             String curFileHash=Utils.sha1(Utils.readContentsAsString(currentFile));
-             
-                if(!stagingArea.checkBlobExistense(fileName, curFileHash))
-                {
-                     //there is modification and last version must be added to staging area
-                     //so create a new blob
-                     String fileHashCWD=blobStore.saveBlob(currentFile);
-                     //then refer to that blob at staging area (adding new version to staging area)
-                            stagingArea.stageForAddition(fileName, fileHashCWD);
-                }
-                else     System.out.println("File '" + fileName + "' is already up-to-date in the staging area.");
-                
-                 
-                stagingArea.unstageForRemoval(fileName);
+
+        String curFileHash = Utils.sha1(Utils.readContentsAsString(currentFile));
+
+        if (!stagingArea.checkBlobExistense(fileName, curFileHash)) {
+            //there is modification and last version must be added to staging area
+            //so create a new blob
+            String fileHashCWD = blobStore.saveBlob(currentFile);
+            //then refer to that blob at staging area (adding new version to staging area)
+            stagingArea.stageForAddition(fileName, fileHashCWD);
+        } else System.out.println("File '" + fileName + "' is already up-to-date in the staging area.");
+
+
+        stagingArea.unstageForRemoval(fileName);
     }
     private void checkGitletExistense() {
       if (!Gitlet_Dir.exists()) {
           Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
       }
   }
-//   //get active branch
-//   private Branch getCurrentBranch() {
-//     return branchStore.getBranch(head.getHead());
-// }
-// //get current commit refered to by active branch
-// private Commit getCurrentCommit()
-// {
-//   String curCommitHash=getCurrentBranch().getReferredCommitHash();
-// return commitStore.getCommit(curCommitHash);
-// }
 
+  public void commit(String Message) {
+      checkGitletExistense(); // check repo is initialized
+      commit(Message , null);
+  }
+
+
+  public void commit(String Message, String SecondParentHash) {
+      if (Message.isEmpty()) Utils.exitWithMessage("you have to enter a commit message");
+      if (stagingArea.IsEmpty()) Utils.exitWithMessage("nothing to commit");
+      Map<String , String>TrackedFilesInTheCurrentCommit = new TreeMap<>();
+      String CurBranchName = Utils.readContentsAsString(Head_file);
+      Branch CurBranch = branchStore.getBranch(CurBranchName);
+      String CurCommitHash = CurBranch.getReferredCommitHash();
+      Map<String , String> trackedFiles = commitStore.getCommit(CurCommitHash).trackedFiles();
+      for(File f : stagingArea.GetFilesForAddition()){
+          String BlobStored = blobStore.saveBlob(f);
+          trackedFiles.put(f.getName() , BlobStored);
+      }
+      for(File f: stagingArea.GetFilesForRemoval()){
+          trackedFiles.remove(f.getName());
+      }
+      Commit NewCommit = new Commit(new Date(0), Message, SecondParentHash,CurCommitHash, trackedFiles);
+      commitStore.saveCommit(NewCommit);
+      CurBranch.SetCommit(NewCommit.getCommitHash());
+      branchStore.saveBranch(CurBranch);
+      stagingArea.clear();
+  }
 
 }
