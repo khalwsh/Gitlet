@@ -330,4 +330,81 @@ return commitStore.getCommit(curCommitHash);
 }
 
 
+private String getCurrentBranchName(){
+    return head.getHead();
+}
+public void status() {
+
+    // printing the branch names
+    checkGitletExistense();
+    System.out.println("=== Branches ===");
+    String CurrentBranchName =getCurrentBranchName();
+    for (String BranchName : branchStore.GetAllBranchesName()) {
+        if (CurrentBranchName.equals(BranchName)) System.out.print("*");
+        System.out.println(BranchName);
+    }
+    System.out.println();
+    // now printing staged Addition files
+    System.out.println("=== Staged Files ===");
+    for (String filename : stagingArea.GetNameOfFilesForAddition()) {
+        System.out.println(filename);
+    }
+    System.out.println();
+    // now printing staged for removal files
+    System.out.println("=== Removed Files ===");
+    for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
+        System.out.println(filename);
+    }
+    System.out.println();
+
+
+    // now print the files that modified in working tree but not in the staging area
+    System.out.println("=== Modifications Not Staged For Commit ===");
+
+    // modified hashing changed from the one in Staging area
+    File[] WorkingTreeFiles = workingArea.WorkingTreeFiles();
+    Set<String> StagingAreaSet = (stagingArea.GetNameOfFilesForAddition().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForAddition())));
+
+    for (File file : WorkingTreeFiles) {
+        if(StagingAreaSet != null && StagingAreaSet.contains(file.getName())) {
+            String WorkingTreeFileHash = Utils.sha1(Utils.readContentsAsString(file));
+            String StagingAreaFileHash = Utils.readContentsAsString(new File(stagingArea.GetAdditionDir() , file.getName()));
+            if(!WorkingTreeFileHash.equals(StagingAreaFileHash)) {
+                System.out.println(file.getName() + " (modified) ");
+            }
+        }
+    }
+    // deleted: exist in last commit and not staged for delete and not exist in working tree
+    Commit LastCommit = getCurrentCommit();
+    TreeSet<String> StagingAreaRem = (stagingArea.GetNameOfFilesForRemoval().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForRemoval())));
+    TreeSet<String> WorkingTreeNames = new TreeSet<> (Arrays.asList(workingArea.NameOfFilesInWorkingArea()));
+    for (Map.Entry<String, String> entry : LastCommit.trackedFiles().entrySet()) {
+//            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+        String FileName = entry.getKey();
+        if(!WorkingTreeNames.contains(FileName) && (StagingAreaRem == null || !StagingAreaRem.contains(FileName))) {
+            System.out.println(FileName + " (deleted) ");
+        }
+    }
+    System.out.println();
+
+
+    // now the untracked files
+    System.out.println("=== Untracked Files ===");
+    File[] files = workingArea.WorkingTreeFiles();
+    if (stagingArea.IsEmpty()) {
+        for (File f : files) {
+            if (f.isDirectory()) continue;
+            System.out.println(f.getName());
+        }
+        System.out.println();
+        return;
+    }
+    TreeSet<String> fileSet = new TreeSet<>(Arrays.asList(stagingArea.GetAllFilesNames()));
+    for (File f : files) {
+        if (fileSet.contains(f.getName())) continue;
+        if (f.isDirectory()) continue;
+        System.out.println(f.getName());
+    }
+    System.out.println();
+}
 }
