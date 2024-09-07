@@ -34,4 +34,9 @@ public class BranchStore {
                   
                 return listOfCommits;
        }
+       public boolean CheckBranchExistence(String branchName)
+       {
+               File branchFile=Utils.join(Branches_Dir, branchName);
+               return branchFile.exists();
+       }
 }

@@ -66,7 +66,7 @@ public class Repository {
         commitStore.saveCommit(commit);
         Branch master = new Branch("master", commit.getCommitHash());// create master branch
         branchStore.saveBranch(master);
-        head.setHead(master); //set head to point to master
+        head.setHead(master.getName()); //set head to point to master
     }
   
 ///If the file in the working directory is different from the file in the staging area:
@@ -136,7 +136,17 @@ public class Repository {
       }
      
     }
-
+    public void globallog()
+    {
+      checkGitletExistense(); // check repo is initialized
+      ArrayList<Commit>listOfCommits=commitStore.getAllCommitsHistory();
+      for(int i=0;i<listOfCommits.size();i++)
+      {
+        System.out.println("===");
+        System.out.println(listOfCommits.get(i));
+      }
+     
+    }
 
 
     private void checkGitletExistense() {
@@ -171,12 +181,96 @@ public class Repository {
       
       Commit NewCommit = new Commit(new Date(), Message, SecondParentHash,CurCommitHash, trackedFiles);
       commitStore.saveCommit(NewCommit);
-      
+
       Branch CurBranch=getCurrentBranch();
       CurBranch.SetCommit(NewCommit.getCommitHash());
       branchStore.saveBranch(CurBranch);
       stagingArea.clear();
   }
+  public void CheckOutFile(String fileName)
+  {
+          String fileHashInHead=getCurrentCommit().trackedFiles().get(fileName);
+          if(fileHashInHead==null) System.out.println("File does not exist in that commit.");
+          else
+          {
+            String blobContent=blobStore.getBlobContent(fileHashInHead);
+            workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
+          }
+  }
+  public void CheckOutFileByHash(String commitHash,String fileName)
+  {
+                   Commit targetCommit= commitStore.getCommit(commitHash);
+                   if(targetCommit==null) System.out.println("No commit with that id exists.");
+                   else{
+                    String fileHash= targetCommit.trackedFiles().get(fileName);
+                    if(fileHash==null)  System.out.println("File does not exist in that commit.");
+                    else
+                    {
+                      String blobContent=blobStore.getBlobContent(fileHash);
+                      workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
+                    }
+                   }
+
+  }
+  public void CheckOutBranch(String branchName)
+  {
+         //check branch existence and not the same as the current one
+        if( !branchStore.CheckBranchExistence(branchName)) System.out.println("No such branch exists.");
+        else
+        {
+              String activeBranch= head.getHead();
+              if(activeBranch==branchName) System.out.println("No need to checkout the current branch.");
+              else{
+                //get list of all tracked files in both active and target branches
+                Map<String,String>trackedInActive=getCurrentCommit().trackedFiles();
+
+               String commitHashInTarget= branchStore.getBranch(branchName).getReferredCommitHash();
+               Commit targetCommit=commitStore.getCommit(commitHashInTarget);
+
+               Map<String,String>trackedInTarget=targetCommit.trackedFiles();
+
+               //check for tracked in active 
+               for (Map.Entry<String, String> entry : trackedInActive.entrySet())
+                {
+
+                String hashOfTarget=trackedInTarget.get(entry.getKey());
+                if(hashOfTarget==null)
+                {
+                         //tracked in active and untracked in target=> remove it from CWD
+                         workingArea.removeFromCWD(entry.getKey());
+                }
+                else
+                {//tracked in active and target
+                     //replace version of target into CWD
+                     workingArea.addOrUpdateFileAtCWD(entry.getKey(),hashOfTarget);
+                }
+               }
+               //check for tracked in target
+               for(Map.Entry<String,String>entry:trackedInTarget.entrySet())
+               {
+                String hashOfActive=trackedInActive.get(entry.getKey());
+                //tracked in target and not tracked in active
+                if(hashOfActive==null)
+                {
+                      //two cases
+                      File existInCWD=workingArea.checkFileExistense(entry.getKey());
+                      if(existInCWD==null)
+                      {// create new one at CWD with content from target
+                                   workingArea.addOrUpdateFileAtCWD(entry.getKey(), entry.getValue());
+                      }
+                      //can't take action since it is not tracked or removed
+                      else System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                }
+               }
+               //change active branch to target
+               head.setHead(branchName);
+                     
+              }
+        }
+        
+  }
+  
+  
   //get active branch
   private Branch getCurrentBranch() 
   { 

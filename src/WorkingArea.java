@@ -15,4 +15,11 @@ public class WorkingArea {
       File file=Utils.join(Working_Dir, fileName);
       if(file.exists()) file.delete();
     }
+    public void addOrUpdateFileAtCWD(String fileName,String fileContent)
+    {
+      File file=Utils.join(Working_Dir, fileName);
+     
+               Utils.writeContents(file, fileContent);
+     
+    }
 }

@@ -16,11 +16,17 @@ public class BlobStore {
           
           File blobFile=Utils.join(Blobs_Dir, curFileHash);
          
-          Utils.writeObject(blobFile,fileContent);
+          Utils.writeContents(blobFile,fileContent);
           
           return curFileHash;
 
-          
+      }
+
+      public String getBlobContent(String hash)
+      {
+            File file=Utils.join(Blobs_Dir, hash);
+           
+            return Utils.readContentsAsString(file);
       }
     //   public boolean checkBlobHash(String hash)
     //   {

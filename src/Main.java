@@ -23,10 +23,14 @@ public class Main {
         case "add":
         
         ValidateArgs(1, args.length-1);
-        repository.add(args[1]);
+        repository.add("file.txt");
         
         break;
         
+        case "commit":
+         ValidateArgs(1, args.length-1);
+         repository.commit("a commit");
+         break;
         
         
         
@@ -43,10 +47,35 @@ public class Main {
          repository.log();
 
          break;
-        case"commit":
-         ValidateArgs(1, args.length-1);
-         repository.commit(args[1]);
+
+         case "global-log":
+         ValidateArgs(0, args.length-1);
+         repository.globallog();
+
          break;
+         
+         case "checkout":
+        
+               if(args.length==3 &&args[1]=="--")
+               {
+                        //java gitlet.Main checkout -- [file name]
+                        repository.CheckOutFile(args[2]);
+                           break;
+               }
+               else if(args.length==4 &&args[2]=="--")
+               {
+                         //java gitlet.Main checkout [commit id] -- [file name]
+                         repository.CheckOutFileByHash(args[1], args[3]);
+                         break;
+               }
+               else if(args.length==2)
+               {
+                   //java gitlet.Main checkout [branch name]
+                   repository.CheckOutBranch(args[1]);
+                   break;
+               }
+               else  Utils.exitWithMessage("Incorrect Operands");
+
          default:
             break;
        }

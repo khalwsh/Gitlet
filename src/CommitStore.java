@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 public class CommitStore {
     private final File Commits_Dir;
 
@@ -7,6 +8,11 @@ public class CommitStore {
     {
      this.Commits_Dir=Commits_Dir;
     }
+    public File[] GetCommitFiles(){
+     File[] filesList = Commits_Dir.listFiles();
+     return filesList;
+ }
+
        public void saveCommit(Commit commit)
        {
              File currentCommitFile=Utils.join(Commits_Dir, commit.getCommitHash());
@@ -24,5 +30,15 @@ public class CommitStore {
             return null;
         
        }
+       public ArrayList<Commit> getAllCommitsHistory()
+       {
+          ArrayList<Commit>listOfCommits=new ArrayList<>();
+      for(File f:GetCommitFiles())
+      {
+           listOfCommits.add(Utils.readObject(f, Commit.class));
+      }
+      return listOfCommits;
+       
+     }
 
 }
