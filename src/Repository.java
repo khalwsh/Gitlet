@@ -90,7 +90,7 @@ public class Repository {
             String fileHashCWD = blobStore.saveBlob(currentFile);
             //then refer to that blob at staging area (adding new version to staging area)
             stagingArea.stageForAddition(fileName, fileHashCWD);
-        } else System.out.println("File '" + fileName + "' is already up-to-date in the staging area.");
+        } else Utils.exitWithMessage("This file is already up-to-date in the staging area.");
 
 
         stagingArea.unstageForRemoval(fileName);
@@ -109,7 +109,7 @@ public class Repository {
         if(fileHash==null) //untracked
         {
           if(checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
-          else System.out.println("No reason to remove the file."); //untracked and not staged for addition
+          else Utils.exitWithMessage("No reason to remove the file.");; //untracked and not staged for addition
         }
         else
         {
@@ -189,8 +189,9 @@ public class Repository {
   }
   public void CheckOutFile(String fileName)
   {
+    checkGitletExistense(); // check repo is initialized
           String fileHashInHead=getCurrentCommit().trackedFiles().get(fileName);
-          if(fileHashInHead==null) System.out.println("File does not exist in that commit.");
+          if(fileHashInHead==null) Utils.exitWithMessage("File does not exist in that commit.");
           else
           {
             String blobContent=blobStore.getBlobContent(fileHashInHead);
@@ -199,11 +200,12 @@ public class Repository {
   }
   public void CheckOutFileByHash(String commitHash,String fileName)
   {
+    checkGitletExistense(); // check repo is initialized
                    Commit targetCommit= commitStore.getCommit(commitHash);
-                   if(targetCommit==null) System.out.println("No commit with that id exists.");
+                   if(targetCommit==null) Utils.exitWithMessage("No commit with that id exists.");
                    else{
                     String fileHash= targetCommit.trackedFiles().get(fileName);
-                    if(fileHash==null)  System.out.println("File does not exist in that commit.");
+                    if(fileHash==null)  Utils.exitWithMessage("File does not exist in that commit.");
                     else
                     {
                       String blobContent=blobStore.getBlobContent(fileHash);
@@ -214,12 +216,13 @@ public class Repository {
   }
   public void CheckOutBranch(String branchName)
   {
+    checkGitletExistense(); // check repo is initialized
          //check branch existence and not the same as the current one
-        if( !branchStore.CheckBranchExistence(branchName)) System.out.println("No such branch exists.");
+        if( !branchStore.CheckBranchExistence(branchName))Utils.exitWithMessage("No such branch exists.");
         else
         {
               String activeBranch= head.getHead();
-              if(activeBranch==branchName) System.out.println("No need to checkout the current branch.");
+              if(activeBranch.equals(branchName)) Utils.exitWithMessage("No need to checkout the current branch.");
               else{
                 //get list of all tracked files in both active and target branches
                 Map<String,String>trackedInActive=getCurrentCommit().trackedFiles();
@@ -242,7 +245,8 @@ public class Repository {
                 else
                 {//tracked in active and target
                      //replace version of target into CWD
-                     workingArea.addOrUpdateFileAtCWD(entry.getKey(),hashOfTarget);
+                     String blobContent=blobStore.getBlobContent(hashOfTarget);
+                     workingArea.addOrUpdateFileAtCWD(entry.getKey(),blobContent);
                 }
                }
                //check for tracked in target
@@ -256,21 +260,49 @@ public class Repository {
                       File existInCWD=workingArea.checkFileExistense(entry.getKey());
                       if(existInCWD==null)
                       {// create new one at CWD with content from target
-                                   workingArea.addOrUpdateFileAtCWD(entry.getKey(), entry.getValue());
+                        String blobContent=blobStore.getBlobContent(entry.getValue());
+                                   workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
                       }
                       //can't take action since it is not tracked or removed
-                      else System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                      else Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
                 }
                }
-               //change active branch to target
+               //change active branch to target and clear staging area
                head.setHead(branchName);
+               stagingArea.clear();
                      
               }
         }
         
   }
   
-  
+  public void branch(String targetBranchName)
+  {
+         checkGitletExistense();
+         String activeBranch= head.getHead();
+          if(activeBranch==targetBranchName) Utils.exitWithMessage("No need to checkout the current branch.");
+          else
+          {
+           String lastCommitHashInActive=getCurrentCommit().getCommitHash();
+           branchStore.createNewBranch(targetBranchName, lastCommitHashInActive); 
+          }
+  }
+  public void rmbranch(String branchName)
+  {
+        String activeBranchName=head.getHead();
+           
+         if(branchName.equals(activeBranchName)) Utils.exitWithMessage("Cannot remove the current branch.");
+           else
+            {
+                 boolean branchExist=branchStore.CheckBranchExistence(branchName);
+                 if(branchExist==false) Utils.exitWithMessage("A branch with that name does not exist.");
+                 else
+                 {
+                  //branch exist and not active one then remove it
+                   branchStore.deleteBranch(branchName);
+                 }
+           }
+  }
   //get active branch
   private Branch getCurrentBranch() 
   { 

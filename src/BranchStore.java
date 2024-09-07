@@ -13,12 +13,18 @@ public class BranchStore {
              File currentBranchFile=Utils.join(Branches_Dir, branch.getName());
             Utils.writeObject(currentBranchFile, branch);
        }
+       public void deleteBranch(String branchName)
+       {
+             File branchFile=Utils.join(Branches_Dir, branchName);
+             branchFile.delete();
+       }
        public Branch getBranch(String branchName)
        {
         File branchFile = Utils.join(Branches_Dir, branchName);
         if (!branchFile.exists()) return null;
         return Utils.readObject(branchFile, Branch.class);
        }
+
        public ArrayList<Commit> getBranchHistory(Commit currCommit, CommitStore commitStore)
        {
                 ArrayList<Commit>listOfCommits=new ArrayList<Commit>();
@@ -38,5 +44,11 @@ public class BranchStore {
        {
                File branchFile=Utils.join(Branches_Dir, branchName);
                return branchFile.exists();
+       }
+       public void createNewBranch(String branchName ,String commitHash)
+       {
+       
+              Branch newBranch=new Branch(branchName, commitHash);
+              saveBranch(newBranch);
        }
 }

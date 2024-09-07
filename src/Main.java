@@ -23,13 +23,13 @@ public class Main {
         case "add":
         
         ValidateArgs(1, args.length-1);
-        repository.add("file.txt");
+        repository.add(args[1]);
         
         break;
         
         case "commit":
          ValidateArgs(1, args.length-1);
-         repository.commit("a commit");
+         repository.commit(args[1]);
          break;
         
         
@@ -55,14 +55,14 @@ public class Main {
          break;
          
          case "checkout":
-        
-               if(args.length==3 &&args[1]=="--")
+         
+               if(args.length==3 &&args[1].equals("--"))
                {
                         //java gitlet.Main checkout -- [file name]
                         repository.CheckOutFile(args[2]);
                            break;
                }
-               else if(args.length==4 &&args[2]=="--")
+               else if(args.length==4 &&args[2].equals("--"))
                {
                          //java gitlet.Main checkout [commit id] -- [file name]
                          repository.CheckOutFileByHash(args[1], args[3]);
@@ -74,8 +74,16 @@ public class Main {
                    repository.CheckOutBranch(args[1]);
                    break;
                }
-               else  Utils.exitWithMessage("Incorrect Operands");
+               else  {Utils.exitWithMessage("Incorrect Operands");}
+        case "branch":
+             ValidateArgs(1, args.length-1);
+              repository.branch(args[1]);
+              break;
 
+        case "rm-branch":
+               ValidateArgs(1, args.length-1);
+               repository.rmbranch(args[1]);
+               break;
          default:
             break;
        }
