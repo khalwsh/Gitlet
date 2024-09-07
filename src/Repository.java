@@ -18,7 +18,9 @@ public class Repository {
     private final File Staged_Dir;
     private final File Addition_Dir;
     private final File Removal_Dir;
+    private final File Remote_Dir;
     private final File Head_file;
+    
 
     private final Head head;
     private final CommitStore commitStore;
@@ -26,7 +28,7 @@ public class Repository {
     private final BlobStore blobStore;
     private final WorkingArea workingArea;
     private final StagingArea stagingArea;
-
+       private final RemoteStore remoteStore;
     public Repository(String cwd) {
         CWD = new File(cwd);
 
@@ -39,6 +41,7 @@ public class Repository {
         Staged_Dir = Utils.join(Gitlet_Dir, "staged");
         Addition_Dir = Utils.join(Staged_Dir, "addition");
         Removal_Dir = Utils.join(Staged_Dir, "removal");
+        Remote_Dir=Utils.join(Gitlet_Dir, "remotes");
         Head_file = Utils.join(Gitlet_Dir, "head");
 
         commitStore = new CommitStore(Commits_Dir);
@@ -46,6 +49,7 @@ public class Repository {
         blobStore = new BlobStore(Blobs_Dir);
         workingArea = new WorkingArea(CWD);
         stagingArea = new StagingArea(Addition_Dir, Removal_Dir);
+        remoteStore=new RemoteStore(Remote_Dir);
         head = new Head(Head_file);
     }
 
@@ -59,7 +63,7 @@ public class Repository {
         Addition_Dir.mkdir();
         Removal_Dir.mkdir();
         Branches_Dir.mkdir();
-
+        Remote_Dir.mkdir();
         try {
             Head_file.createNewFile();
         } catch (java.io.IOException ex) {
@@ -317,17 +321,6 @@ public class Repository {
                  }
            }
   }
-  //get active branch
-  private Branch getCurrentBranch() 
-  { 
-    return branchStore.getBranch(head.getHead());
-  }
-//get current commit refered to by active branch
-private Commit getCurrentCommit()
-{
-  String curCommitHash=getCurrentBranch().getReferredCommitHash();
-return commitStore.getCommit(curCommitHash);
-}
 
 
 private String getCurrentBranchName(){
@@ -406,5 +399,31 @@ public void status() {
         System.out.println(f.getName());
     }
     System.out.println();
+}
+
+public void addRemote(String remoteName,String remotePath)
+{
+    File remoteDir = new File(remotePath);
+    if (!remotePath.endsWith(".gitlet")|| !remoteDir.isDirectory())  Utils.exitWithMessage("Invalid path for directory");
+       
+  remoteStore.addRemotePath(remoteName, remotePath);
+
+
+ 
+}
+public void removeRemote(String remoteName)
+{
+ remoteStore.removeRemotePath(remoteName);       
+}
+  //get active branch
+  private Branch getCurrentBranch() 
+  { 
+    return branchStore.getBranch(head.getHead());
+  }
+//get current commit refered to by active branch
+private Commit getCurrentCommit()
+{
+  String curCommitHash=getCurrentBranch().getReferredCommitHash();
+return commitStore.getCommit(curCommitHash);
 }
 }

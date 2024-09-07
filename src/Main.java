@@ -1,4 +1,4 @@
-import java.util.*;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -84,6 +84,16 @@ public class Main {
                ValidateArgs(1, args.length-1);
                repository.rmbranch(args[1]);
                break;
+       case "add-remote":
+            
+              ValidateArgs(2, args.length-1);   
+               repository.addRemote(args[1],args[2]);
+               break;
+       case "rm-remote":
+       ValidateArgs(1, args.length-1);
+       repository.removeRemote(args[1]);
+       break;
+       
          default:
             break;
        }
@@ -93,4 +103,5 @@ public class Main {
     private static void ValidateArgs(int n, int argsLength) {
         if (argsLength != n) Utils.exitWithMessage("Incorrect Operands");
     }
+ 
 }
