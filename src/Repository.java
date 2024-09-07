@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.TreeSet;
+import java.io.*;
 public class Repository {
     private final File CWD;
     private final File Gitlet_Dir;
@@ -275,12 +279,88 @@ public class Repository {
     private Branch getCurrentBranch() {
         return branchStore.getBranch(head.getHead());
     }
-
+    private String getCurrentBranchName(){
+        return head.getHead();
+    }
     //get current commit refered to by active branch
     private Commit getCurrentCommit() {
         String curCommitHash = getCurrentBranch().getReferredCommitHash();
         return commitStore.getCommit(curCommitHash);
     }
+    public void status() {
+
+        // printing the branch names
+        checkGitletExistense();
+        System.out.println("=== Branches ===");
+        String CurrentBranchName = getCurrentBranchName();
+        for (String BranchName : branchStore.GetAllBranchesName()) {
+            if (CurrentBranchName.equals(BranchName)) System.out.print("*");
+            System.out.println(BranchName);
+        }
+        System.out.println();
+        // now printing staged Addition files
+        System.out.println("=== Staged Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForAddition()) {
+            System.out.println(filename);
+        }
+        System.out.println();
+        // now printing staged for removal files
+        System.out.println("=== Removed Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
+            System.out.println(filename);
+        }
+        System.out.println();
 
 
+        // now print the files that modified in working tree but not in the staging area
+
+        System.out.println("=== Modifications Not Staged For Commit ===");
+
+        String[] workingFiles = workingArea.NameOfFilesInWorkingArea();
+
+        TreeSet<String> stagedForAddition = new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForAddition()));
+
+        for (String file : workingFiles) {
+            if (file.equals(".gitlet")) continue; // Skip gitlet folder
+
+            File currentFile = workingArea.checkFileExistense(file);
+            if (currentFile == null) Utils.exitWithMessage("File doesn't exist");
+            
+//            String curFileHash = Utils.sha1(Utils.readContentsAsString(currentFile));
+//            String StagedFile = Utils.readContentsAsString(new File(Staged_Dir , file));
+//            if (stagedForAddition.contains(file) && !curFileHash.equals(StagedFile)) {
+//                System.out.println(file + " (modified)");
+//            }
+        }
+
+        for (String file : stagedForAddition) {
+            File workingFile = new File(workingArea.getWorkingDir() , file);
+            if (!workingFile.exists()) {
+                System.out.println(file + " (deleted)");
+            }
+        }
+        System.out.println();
+
+
+        // now the untracked files
+
+
+        System.out.println("=== Untracked Files ===");
+        String[] files = workingArea.NameOfFilesInWorkingArea();
+        if (stagingArea.IsEmpty()) {
+            for (String File : files) {
+                if (File.equals(".gitlet")) continue;
+                System.out.println(File);
+            }
+            System.out.println();
+            return;
+        }
+        TreeSet<String> fileSet = new TreeSet<>(Arrays.asList(stagingArea.GetAllFilesNames()));
+        for (String File : files) {
+            if (fileSet.contains(File)) continue;
+            if (File.equals(".gitlet")) continue;
+            System.out.println(File);
+        }
+        System.out.println();
+    }
 }

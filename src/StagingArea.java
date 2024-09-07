@@ -6,15 +6,44 @@ public class StagingArea {
 
 
     public File[] GetFilesForAddition() {
-        File[] filesList = Addition_Dir.listFiles();
-        return filesList;
+        return Addition_Dir.listFiles();
     }
-
+    public String[] GetNameOfFilesForAddition(){
+        return Addition_Dir.list();
+    }
     public File[] GetFilesForRemoval() {
-        File[] filesList = Removal_Dir.listFiles();
-        return filesList;
-    }
+        return Removal_Dir.listFiles();
 
+    }
+    public String[] GetNameOfFilesForRemoval() {
+       return Removal_Dir.list();
+    }
+    public String[] GetAllFilesNames(){
+        // Get file names from both directories
+        String[] additionFiles = GetNameOfFilesForAddition();
+        String[] removalFiles = GetNameOfFilesForRemoval();
+        if(additionFiles.length == 0 && removalFiles.length == 0){
+            return null;
+        }
+        // Handle null cases (in case directories are empty or invalid)
+        if (additionFiles == null) {
+            additionFiles = new String[0];
+        }
+        if (removalFiles == null) {
+            removalFiles = new String[0];
+        }
+
+        // Create an array to hold all file names from both directories
+        String[] allFiles = new String[additionFiles.length + removalFiles.length];
+
+        // Copy files from the first directory
+        System.arraycopy(additionFiles, 0, allFiles, 0, additionFiles.length);
+
+        // Copy files from the second directory
+        System.arraycopy(removalFiles, 0, allFiles, additionFiles.length, removalFiles.length);
+
+        return allFiles;
+    }
     public boolean IsEmpty() {
         return GetFilesForAddition().length == 0 && GetFilesForRemoval().length == 0;
     }
