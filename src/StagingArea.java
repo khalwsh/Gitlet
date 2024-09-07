@@ -5,17 +5,20 @@ public class StagingArea {
     private final File Removal_Dir;
 
 
-    public File[] GetFilesForAddition(){
+    public File[] GetFilesForAddition() {
         File[] filesList = Addition_Dir.listFiles();
         return filesList;
     }
-    public File[] GetFilesForRemoval(){
+
+    public File[] GetFilesForRemoval() {
         File[] filesList = Removal_Dir.listFiles();
         return filesList;
     }
-    public boolean IsEmpty(){
+
+    public boolean IsEmpty() {
         return GetFilesForAddition().length == 0 && GetFilesForRemoval().length == 0;
     }
+
     public StagingArea(File Addition_Dir, File Removal_Dir) {
         this.Addition_Dir = Addition_Dir;
         this.Removal_Dir = Removal_Dir;
@@ -23,60 +26,57 @@ public class StagingArea {
     }
 
     //this method check if file that exist in working directory is the same as in staging area
-    public boolean checkBlobExistense(String targetedNameFile,String blobHash)
-    {
-     
-        File file=Utils.join(this.Addition_Dir, targetedNameFile);
-        
-          try {
-              file.createNewFile();
-          } catch (IOException e) {
-              System.out.println("Error creating file: " + e.getMessage());
-          }
-      
-             
-   String fileContent = Utils.readContentsAsString(file);
+    public boolean checkBlobExistense(String targetedNameFile, String blobHash) {
+
+        File file = Utils.join(this.Addition_Dir, targetedNameFile);
+
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Error creating file: " + e.getMessage());
+        }
+
+
+        String fileContent = Utils.readContentsAsString(file);
         return fileContent.equals(blobHash);
     }
 
     //Addition_Dir=>fileName=>Sha-1
-  public void stageForAddition(String fileName,String hash)
-  {
-           File file=Utils.join(this.Addition_Dir, fileName);
-           Utils.writeContents(file, hash);
-  }
-  public void UnStageForAddittion(String fileName)
-  {
-    File file=Utils.join(Addition_Dir, fileName);
-    file.delete();
-  }
-  /////add version of file from last commit to Staged/removal dir
-  public void StageForRemoval(String fileName,String hash)
-  {
- File file=Utils.join(Removal_Dir, fileName);
-      Utils.writeContents(file, hash);
-  }
-  public boolean unstageForRemoval(String fileName) 
-  {
-    File file =Utils. join(Removal_Dir, fileName);
+    public void stageForAddition(String fileName, String hash) {
+        File file = Utils.join(this.Addition_Dir, fileName);
+        Utils.writeContents(file, hash);
+    }
 
-    if (file == null) return false;
-    return file.delete();
-     
-  }
-      
-      
-      public boolean CheckFileStagedForAddition(String fileName)
-      {
-                  File file=Utils.join(Addition_Dir, fileName);
-                  return file.exists();
-      }
+    public void UnStageForAddittion(String fileName) {
+        File file = Utils.join(Addition_Dir, fileName);
+        file.delete();
+    }
 
-    public void clear(){
-        for(File file : GetFilesForAddition()){
+    /////add version of file from last commit to Staged/removal dir
+    public void StageForRemoval(String fileName, String hash) {
+        File file = Utils.join(Removal_Dir, fileName);
+        Utils.writeContents(file, hash);
+    }
+
+    public boolean unstageForRemoval(String fileName) {
+        File file = Utils.join(Removal_Dir, fileName);
+
+        if (file == null) return false;
+        return file.delete();
+
+    }
+
+
+    public boolean CheckFileStagedForAddition(String fileName) {
+        File file = Utils.join(Addition_Dir, fileName);
+        return file.exists();
+    }
+
+    public void clear() {
+        for (File file : GetFilesForAddition()) {
             file.delete();
         }
-        for(File file : GetFilesForRemoval()){
+        for (File file : GetFilesForRemoval()) {
             file.delete();
         }
     }
