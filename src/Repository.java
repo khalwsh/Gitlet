@@ -145,12 +145,17 @@ public class Repository {
     public void find(String Message) {
         // this function search throw all commits and return the hashes of the commits that has this message
         checkGitletExistense(); // check repo is initialized
+        if(Message.isEmpty()){
+            Utils.exitWithMessage("incorrect operands");
+        }
         ArrayList<Commit> listOfCommits = commitStore.getAllCommitsHistory();
         for (Commit x : listOfCommits) {
             if (x.CommitMessage().equals(Message)) {
                 System.out.println(x);
             }
         }
+        if(!listOfCommits.isEmpty())return;
+        System.out.println("there is no commit with this message");
     }
 
     private void checkGitletExistense() {
