@@ -73,6 +73,10 @@ public class Main {
                 // it takes commit message and return the hashes of all commits has this message
                 ValidateArgs(1, args.length - 1);
                 repository.find(args[1]);
+                break;
+            case "status":
+                ValidateArgs(0, args.length - 1);
+                repository.status();
             default:
                 break;
         }
