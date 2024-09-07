@@ -7,9 +7,9 @@ public class Head {
         head_Dir = Head_Dir;
     }
 
-    public void setHead(Branch branch) // set branch name at head file that head refers to
+    public void setHead(String branchName) // set branch name at head file that head refers to
     {
-        Utils.writeContents(head_Dir, branch.getName());
+        Utils.writeContents(head_Dir, branchName);
     }
 
     public String getHead()//get branch name that head refers to
