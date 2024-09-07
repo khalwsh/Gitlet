@@ -6,7 +6,7 @@ public class StagingArea {
 
 
     public File[] GetFilesForAddition() {
-        return Addition_Dir.listFiles();
+        return Addition_Dir.listFiles(file -> file.isFile());
     }
     public String[] GetNameOfFilesForAddition(){
         return Addition_Dir.list();
@@ -99,6 +99,9 @@ public class StagingArea {
     public boolean CheckFileStagedForAddition(String fileName) {
         File file = Utils.join(Addition_Dir, fileName);
         return file.exists();
+    }
+    public File GetAdditionDir(){
+        return this.Addition_Dir;
     }
 
     public void clear() {

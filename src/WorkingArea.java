@@ -22,6 +22,9 @@ public class WorkingArea {
         Utils.writeContents(file, fileContent);
 
     }
+    public File[] WorkingTreeFiles(){
+        return Working_Dir.listFiles(File::isFile);
+      }
     public File getWorkingDir() {
         return Working_Dir;
     }

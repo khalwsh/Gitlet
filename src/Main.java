@@ -40,12 +40,20 @@ public class Main {
                repository.globallog();
                break;
 
-        
+            case "find":
+             ValidateArgs(1, args.length-1);
+             repository.find(args[1]);
+             break;
             case "rm":
                ValidateArgs(1, args.length-1);
-               repository.commit(args[1]);
+               repository.rm(args[1]);
                break;
-        
+
+         case "status":
+           ValidateArgs(0, args.length-1);
+           repository.status();
+           break;
+
             case "checkout":
          
                if(args.length==3 &&args[1].equals("--"))

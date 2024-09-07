@@ -50,4 +50,7 @@ public class BranchStore {
               Branch newBranch=new Branch(branchName, commitHash);
               saveBranch(newBranch);
        }
+       public String[]GetAllBranchesName() {
+        return Branches_Dir.list();
+    }
 }
