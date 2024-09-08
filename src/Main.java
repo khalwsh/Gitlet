@@ -89,7 +89,9 @@ public class Main {
                 ValidateArgs(1, args.length - 1);
                 repository.removeRemote(args[1]);
                 break;
-
+            case "reset":
+                ValidateArgs(1, args.length - 1);
+                repository.reset(args[1]);
             default:
                 Utils.exitWithMessage("Incorrect Command");
         }

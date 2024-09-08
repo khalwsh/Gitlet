@@ -58,7 +58,14 @@ public class StagingArea {
         this.Removal_Dir = Removal_Dir;
 
     }
-
+    public boolean isTracked(String fileName){
+        for(String name : GetNameOfFilesForAddition()){
+            if(name.equals(fileName)){
+                return true;
+            }
+        }
+        return false;
+    }
     //this method check if file that exist in working directory is the same as in staging area
     public boolean checkBlobExistense(String targetedNameFile, String blobHash) {
 
@@ -111,9 +118,13 @@ public class StagingArea {
     }
 
     public void clear() {
-        for (File file : GetFilesForAddition()) {
+        File[] files = GetFilesForAddition();
+        if(files == null)return;
+        for (File file : files) {
             file.delete();
         }
+        files = GetFilesForRemoval();
+        if(files == null)return;
         for (File file : GetFilesForRemoval()) {
             file.delete();
         }
