@@ -91,7 +91,7 @@ public class Main {
                 break;
 
             default:
-                break;
+                Utils.exitWithMessage("Incorrect Command");
         }
 
     }
