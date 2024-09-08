@@ -433,7 +433,14 @@ public class Repository {
         // Checkout files from the target commit
         targetCommit.trackedFiles().keySet().forEach(fileName -> CheckOutFileByHash(targetCommit.getCommitHash() , fileName));
     }
-
+    /*
+    Checks out all the files tracked by the given commit.
+    Removes tracked files that are not present in that commit.
+    Also moves the current branch’s head to that commit node.
+    SeThe [commit id] may be abbreviated as for checkout.
+    The staging area is cleared.
+    The command is essentially checkout of an arbitrary commit that also changes the current branch head.
+     */
     public void reset(String commitHash) {
         checkGitletExistense();
 
