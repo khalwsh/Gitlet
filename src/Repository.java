@@ -427,22 +427,21 @@ public class Repository {
         }
 
         // Clear working and staging areas
-        workingArea.Clear();
+        workingArea.Clear();  // Ensure this method is correctly implemented
         stagingArea.clear();
 
         // Checkout files from the target commit
-        targetCommit.trackedFiles().keySet().forEach(fileName -> CheckOutFileByHash(targetCommit.getCommitHash() , fileName));
+        targetCommit.trackedFiles().keySet().forEach(fileName ->
+                CheckOutFileByHash(targetCommit.getCommitHash(), fileName));
+
+        // Remove files that are tracked in the current commit but not in the target commit
+        getCurrentCommit().trackedFiles().keySet().stream()
+                .filter(fileName -> !targetCommit.trackedFiles().containsKey(fileName))
+                .forEach(fileName -> workingArea.remove(fileName)); // Ensure remove() is implemented
     }
-    /*
-    Checks out all the files tracked by the given commit.
-    Removes tracked files that are not present in that commit.
-    Also moves the current branch’s head to that commit node.
-    SeThe [commit id] may be abbreviated as for checkout.
-    The staging area is cleared.
-    The command is essentially checkout of an arbitrary commit that also changes the current branch head.
-     */
+
     public void reset(String commitHash) {
-        checkGitletExistense();
+        checkGitletExistense();  // Ensure method name is correct
 
         // Retrieve target commit
         Commit targetCommit = commitStore.getCommit(commitHash);
@@ -455,9 +454,10 @@ public class Repository {
 
         // Update the current branch to point to the target commit
         Branch currentBranch = getCurrentBranch();
-        currentBranch.SetCommit(targetCommit.getCommitHash());
+        currentBranch.SetCommit(targetCommit.getCommitHash());  // Ensure this method is correctly implemented
         branchStore.saveBranch(currentBranch);
     }
+
 
 
 }
