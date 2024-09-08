@@ -8,21 +8,25 @@ public class StagingArea {
     public File[] GetFilesForAddition() {
         return Addition_Dir.listFiles(file -> file.isFile());
     }
-    public String[] GetNameOfFilesForAddition(){
+
+    public String[] GetNameOfFilesForAddition() {
         return Addition_Dir.list();
     }
+
     public File[] GetFilesForRemoval() {
         return Removal_Dir.listFiles();
 
     }
+
     public String[] GetNameOfFilesForRemoval() {
-       return Removal_Dir.list();
+        return Removal_Dir.list();
     }
-    public String[] GetAllFilesNames(){
+
+    public String[] GetAllFilesNames() {
         // Get file names from both directories
         String[] additionFiles = GetNameOfFilesForAddition();
         String[] removalFiles = GetNameOfFilesForRemoval();
-        if(additionFiles.length == 0 && removalFiles.length == 0){
+        if (additionFiles.length == 0 && removalFiles.length == 0) {
             return null;
         }
         // Handle null cases (in case directories are empty or invalid)
@@ -44,6 +48,7 @@ public class StagingArea {
 
         return allFiles;
     }
+
     public boolean IsEmpty() {
         return GetFilesForAddition().length == 0 && GetFilesForRemoval().length == 0;
     }
@@ -100,7 +105,8 @@ public class StagingArea {
         File file = Utils.join(Addition_Dir, fileName);
         return file.exists();
     }
-    public File GetAdditionDir(){
+
+    public File GetAdditionDir() {
         return this.Addition_Dir;
     }
 

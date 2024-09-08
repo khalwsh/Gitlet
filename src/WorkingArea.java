@@ -22,13 +22,16 @@ public class WorkingArea {
         Utils.writeContents(file, fileContent);
 
     }
-    public File[] WorkingTreeFiles(){
+
+    public File[] WorkingTreeFiles() {
         return Working_Dir.listFiles(File::isFile);
-      }
+    }
+
     public File getWorkingDir() {
         return Working_Dir;
     }
-    public String[] NameOfFilesInWorkingArea(){
+
+    public String[] NameOfFilesInWorkingArea() {
 //        System.out.println(System.getProperty("user.dir"));
 //        System.out.println(Working_Dir.list());
 //        for (String fileName : Working_Dir.list()) {
