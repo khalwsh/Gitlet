@@ -7,50 +7,50 @@ public class BranchStore {
     public BranchStore(File Branches_Dir) {
         this.Branches_Dir = Branches_Dir;
     }
-       public void saveBranch(Branch branch)
-       {
-             File currentBranchFile=Utils.join(Branches_Dir, branch.getName());
-            Utils.writeObject(currentBranchFile, branch);
-       }
-       public void deleteBranch(String branchName)
-       {
-             File branchFile=Utils.join(Branches_Dir, branchName);
-             branchFile.delete();
-       }
-       public Branch getBranch(String branchName)
-       {
+
+    public void saveBranch(Branch branch) {
+        File currentBranchFile = Utils.join(Branches_Dir, branch.getName());
+        Utils.writeObject(currentBranchFile, branch);
+    }
+
+    public void deleteBranch(String branchName) {
+        File branchFile = Utils.join(Branches_Dir, branchName);
+        branchFile.delete();
+    }
+
+    public Branch getBranch(String branchName) {
         File branchFile = Utils.join(Branches_Dir, branchName);
         if (!branchFile.exists()) return null;
         return Utils.readObject(branchFile, Branch.class);
-       }
+    }
 
-       public ArrayList<Commit> getBranchHistory(Commit currCommit, CommitStore commitStore)
-       {
-                ArrayList<Commit>listOfCommits=new ArrayList<Commit>();
-                
-                    listOfCommits.add(currCommit);
-                  while (currCommit.getParentCommitHash()!=null) {
+    public ArrayList<Commit> getBranchHistory(Commit currCommit, CommitStore commitStore) {
+        ArrayList<Commit> listOfCommits = new ArrayList<Commit>();
 
-                    String prevCommitHash=currCommit.getParentCommitHash();
-                    Commit prevCommit=commitStore.getCommit(prevCommitHash);
-                    listOfCommits.add(prevCommit);
-                    currCommit=prevCommit;
-                  }
-                  
-                return listOfCommits;
-       }
-       public boolean CheckBranchExistence(String branchName)
-       {
-               File branchFile=Utils.join(Branches_Dir, branchName);
-               return branchFile.exists();
-       }
-       public void createNewBranch(String branchName ,String commitHash)
-       {
-       
-              Branch newBranch=new Branch(branchName, commitHash);
-              saveBranch(newBranch);
-       }
-       public String[]GetAllBranchesName() {
+        listOfCommits.add(currCommit);
+        while (currCommit.getParentCommitHash() != null) {
+
+            String prevCommitHash = currCommit.getParentCommitHash();
+            Commit prevCommit = commitStore.getCommit(prevCommitHash);
+            listOfCommits.add(prevCommit);
+            currCommit = prevCommit;
+        }
+
+        return listOfCommits;
+    }
+
+    public boolean CheckBranchExistence(String branchName) {
+        File branchFile = Utils.join(Branches_Dir, branchName);
+        return branchFile.exists();
+    }
+
+    public void createNewBranch(String branchName, String commitHash) {
+
+        Branch newBranch = new Branch(branchName, commitHash);
+        saveBranch(newBranch);
+    }
+
+    public String[] GetAllBranchesName() {
         return Branches_Dir.list();
     }
 }

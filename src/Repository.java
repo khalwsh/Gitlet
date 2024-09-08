@@ -20,7 +20,7 @@ public class Repository {
     private final File Removal_Dir;
     private final File Remote_Dir;
     private final File Head_file;
-    
+
 
     private final Head head;
     private final CommitStore commitStore;
@@ -28,7 +28,8 @@ public class Repository {
     private final BlobStore blobStore;
     private final WorkingArea workingArea;
     private final StagingArea stagingArea;
-       private final RemoteStore remoteStore;
+    private final RemoteStore remoteStore;
+
     public Repository(String cwd) {
         CWD = new File(cwd);
 
@@ -41,7 +42,7 @@ public class Repository {
         Staged_Dir = Utils.join(Gitlet_Dir, "staged");
         Addition_Dir = Utils.join(Staged_Dir, "addition");
         Removal_Dir = Utils.join(Staged_Dir, "removal");
-        Remote_Dir=Utils.join(Gitlet_Dir, "remotes");
+        Remote_Dir = Utils.join(Gitlet_Dir, "remotes");
         Head_file = Utils.join(Gitlet_Dir, "head");
 
         commitStore = new CommitStore(Commits_Dir);
@@ -49,7 +50,7 @@ public class Repository {
         blobStore = new BlobStore(Blobs_Dir);
         workingArea = new WorkingArea(CWD);
         stagingArea = new StagingArea(Addition_Dir, Removal_Dir);
-        remoteStore=new RemoteStore(Remote_Dir);
+        remoteStore = new RemoteStore(Remote_Dir);
         head = new Head(Head_file);
     }
 
@@ -115,12 +116,11 @@ public class Repository {
         String fileHash = getCurrentCommit().trackedFiles().get(fileName);
         if (fileHash == null) //untracked
         {
-          if(checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
-          else Utils.exitWithMessage("No reason to remove the file.");; //untracked and not staged for addition
-        }
-        else
-        {
-          if(checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
+            if (checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
+            else Utils.exitWithMessage("No reason to remove the file.");
+            ; //untracked and not staged for addition
+        } else {
+            if (checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
             ///add last commited file version to staged for removal 
             stagingArea.StageForRemoval(fileName, fileHash);
             ///remove current file version form CWD
@@ -155,7 +155,7 @@ public class Repository {
     public void find(String Message) {
         // this function search throw all commits and return the hashes of the commits that has this message
         checkGitletExistense(); // check repo is initialized
-        if(Message.isEmpty()){
+        if (Message.isEmpty()) {
             Utils.exitWithMessage("incorrect operands");
         }
         ArrayList<Commit> listOfCommits = commitStore.getAllCommitsHistory();
@@ -164,7 +164,7 @@ public class Repository {
                 System.out.println(x);
             }
         }
-        if(!listOfCommits.isEmpty())return;
+        if (!listOfCommits.isEmpty()) return;
         System.out.println("there is no commit with this message");
     }
 
@@ -201,48 +201,45 @@ public class Repository {
         Commit NewCommit = new Commit(new Date(), Message, SecondParentHash, CurCommitHash, trackedFiles);
         commitStore.saveCommit(NewCommit);
 
-      Branch CurBranch=getCurrentBranch();
-      CurBranch.SetCommit(NewCommit.getCommitHash());
-      branchStore.saveBranch(CurBranch);
-      stagingArea.clear();
-  }
-  public void CheckOutFile(String fileName)
-  {
-    checkGitletExistense(); // check repo is initialized
-          String fileHashInHead=getCurrentCommit().trackedFiles().get(fileName);
-          if(fileHashInHead==null) Utils.exitWithMessage("File does not exist in that commit.");
-          else
-          {
-            String blobContent=blobStore.getBlobContent(fileHashInHead);
-            workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
-          }
-  }
-  public void CheckOutFileByHash(String commitHash,String fileName)
-  {
-    checkGitletExistense(); // check repo is initialized
-                   Commit targetCommit= commitStore.getCommit(commitHash);
-                   if(targetCommit==null) Utils.exitWithMessage("No commit with that id exists.");
-                   else{
-                    String fileHash= targetCommit.trackedFiles().get(fileName);
-                    if(fileHash==null)  Utils.exitWithMessage("File does not exist in that commit.");
-                    else
-                    {
-                      String blobContent=blobStore.getBlobContent(fileHash);
-                      workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
-                    }
-                   }
+        Branch CurBranch = getCurrentBranch();
+        CurBranch.SetCommit(NewCommit.getCommitHash());
+        branchStore.saveBranch(CurBranch);
+        stagingArea.clear();
+    }
 
-  }
-  public void CheckOutBranch(String branchName)
-  {
-    checkGitletExistense(); // check repo is initialized
-         //check branch existence and not the same as the current one
-        if( !branchStore.CheckBranchExistence(branchName))Utils.exitWithMessage("No such branch exists.");
-        else
-        {
-              String activeBranch= head.getHead();
-              if(activeBranch.equals(branchName)) Utils.exitWithMessage("No need to checkout the current branch.");
-              else{
+    public void CheckOutFile(String fileName) {
+        checkGitletExistense(); // check repo is initialized
+        String fileHashInHead = getCurrentCommit().trackedFiles().get(fileName);
+        if (fileHashInHead == null) Utils.exitWithMessage("File does not exist in that commit.");
+        else {
+            String blobContent = blobStore.getBlobContent(fileHashInHead);
+            workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
+        }
+    }
+
+    public void CheckOutFileByHash(String commitHash, String fileName) {
+        checkGitletExistense(); // check repo is initialized
+        Commit targetCommit = commitStore.getCommit(commitHash);
+        if (targetCommit == null) Utils.exitWithMessage("No commit with that id exists.");
+        else {
+            String fileHash = targetCommit.trackedFiles().get(fileName);
+            if (fileHash == null) Utils.exitWithMessage("File does not exist in that commit.");
+            else {
+                String blobContent = blobStore.getBlobContent(fileHash);
+                workingArea.addOrUpdateFileAtCWD(fileName, blobContent);
+            }
+        }
+
+    }
+
+    public void CheckOutBranch(String branchName) {
+        checkGitletExistense(); // check repo is initialized
+        //check branch existence and not the same as the current one
+        if (!branchStore.CheckBranchExistence(branchName)) Utils.exitWithMessage("No such branch exists.");
+        else {
+            String activeBranch = head.getHead();
+            if (activeBranch.equals(branchName)) Utils.exitWithMessage("No need to checkout the current branch.");
+            else {
                 //get list of all tracked files in both active and target branches
                 Map<String, String> trackedInActive = getCurrentCommit().trackedFiles();
 
@@ -254,176 +251,167 @@ public class Repository {
                 //check for tracked in active
                 for (Map.Entry<String, String> entry : trackedInActive.entrySet()) {
 
-                String hashOfTarget=trackedInTarget.get(entry.getKey());
-                if(hashOfTarget==null)
-                {
-                         //tracked in active and untracked in target=> remove it from CWD
-                         workingArea.removeFromCWD(entry.getKey());
+                    String hashOfTarget = trackedInTarget.get(entry.getKey());
+                    if (hashOfTarget == null) {
+                        //tracked in active and untracked in target=> remove it from CWD
+                        workingArea.removeFromCWD(entry.getKey());
+                    } else {//tracked in active and target
+                        //replace version of target into CWD
+                        String blobContent = blobStore.getBlobContent(hashOfTarget);
+                        workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
+                    }
                 }
-                else
-                {//tracked in active and target
-                     //replace version of target into CWD
-                     String blobContent=blobStore.getBlobContent(hashOfTarget);
-                     workingArea.addOrUpdateFileAtCWD(entry.getKey(),blobContent);
+                //check for tracked in target
+                for (Map.Entry<String, String> entry : trackedInTarget.entrySet()) {
+                    String hashOfActive = trackedInActive.get(entry.getKey());
+                    //tracked in target and not tracked in active
+                    if (hashOfActive == null) {
+                        //two cases
+                        File existInCWD = workingArea.checkFileExistense(entry.getKey());
+                        if (existInCWD == null) {// create new one at CWD with content from target
+                            String blobContent = blobStore.getBlobContent(entry.getValue());
+                            workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
+                        }
+                        //can't take action since it is not tracked or removed
+                        else
+                            Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+                    }
                 }
-               }
-               //check for tracked in target
-               for(Map.Entry<String,String>entry:trackedInTarget.entrySet())
-               {
-                String hashOfActive=trackedInActive.get(entry.getKey());
-                //tracked in target and not tracked in active
-                if(hashOfActive==null)
-                {
-                      //two cases
-                      File existInCWD=workingArea.checkFileExistense(entry.getKey());
-                      if(existInCWD==null)
-                      {// create new one at CWD with content from target
-                        String blobContent=blobStore.getBlobContent(entry.getValue());
-                                   workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
-                      }
-                      //can't take action since it is not tracked or removed
-                      else Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
-                }
-               }
-               //change active branch to target and clear staging area
-               head.setHead(branchName);
-               stagingArea.clear();
-                     
-              }
+                //change active branch to target and clear staging area
+                head.setHead(branchName);
+                stagingArea.clear();
+
+            }
         }
-        
-  }
-  
-  public void branch(String targetBranchName)
-  {
-         checkGitletExistense();
-         String activeBranch= head.getHead();
-          if(activeBranch==targetBranchName) Utils.exitWithMessage("No need to checkout the current branch.");
-          else
-          {
-           String lastCommitHashInActive=getCurrentCommit().getCommitHash();
-           branchStore.createNewBranch(targetBranchName, lastCommitHashInActive); 
-          }
-  }
-  public void rmbranch(String branchName)
-  {
-        String activeBranchName=head.getHead();
-           
-         if(branchName.equals(activeBranchName)) Utils.exitWithMessage("Cannot remove the current branch.");
-           else
-            {
-                 boolean branchExist=branchStore.CheckBranchExistence(branchName);
-                 if(branchExist==false) Utils.exitWithMessage("A branch with that name does not exist.");
-                 else
-                 {
-                  //branch exist and not active one then remove it
-                   branchStore.deleteBranch(branchName);
-                 }
-           }
-  }
 
-
-private String getCurrentBranchName(){
-    return head.getHead();
-}
-public void status() {
-
-    // printing the branch names
-    checkGitletExistense();
-    System.out.println("=== Branches ===");
-    String CurrentBranchName =getCurrentBranchName();
-    for (String BranchName : branchStore.GetAllBranchesName()) {
-        if (CurrentBranchName.equals(BranchName)) System.out.print("*");
-        System.out.println(BranchName);
     }
-    System.out.println();
-    // now printing staged Addition files
-    System.out.println("=== Staged Files ===");
-    for (String filename : stagingArea.GetNameOfFilesForAddition()) {
-        System.out.println(filename);
+
+    public void branch(String targetBranchName) {
+        checkGitletExistense();
+        String activeBranch = head.getHead();
+        if (activeBranch == targetBranchName) Utils.exitWithMessage("No need to checkout the current branch.");
+        else {
+            String lastCommitHashInActive = getCurrentCommit().getCommitHash();
+            branchStore.createNewBranch(targetBranchName, lastCommitHashInActive);
+        }
     }
-    System.out.println();
-    // now printing staged for removal files
-    System.out.println("=== Removed Files ===");
-    for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
-        System.out.println(filename);
-    }
-    System.out.println();
 
+    public void rmbranch(String branchName) {
+        String activeBranchName = head.getHead();
 
-    // now print the files that modified in working tree but not in the staging area
-    System.out.println("=== Modifications Not Staged For Commit ===");
-
-    // modified hashing changed from the one in Staging area
-    File[] WorkingTreeFiles = workingArea.WorkingTreeFiles();
-    Set<String> StagingAreaSet = (stagingArea.GetNameOfFilesForAddition().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForAddition())));
-
-    for (File file : WorkingTreeFiles) {
-        if(StagingAreaSet != null && StagingAreaSet.contains(file.getName())) {
-            String WorkingTreeFileHash = Utils.sha1(Utils.readContentsAsString(file));
-            String StagingAreaFileHash = Utils.readContentsAsString(new File(stagingArea.GetAdditionDir() , file.getName()));
-            if(!WorkingTreeFileHash.equals(StagingAreaFileHash)) {
-                System.out.println(file.getName() + " (modified) ");
+        if (branchName.equals(activeBranchName)) Utils.exitWithMessage("Cannot remove the current branch.");
+        else {
+            boolean branchExist = branchStore.CheckBranchExistence(branchName);
+            if (branchExist == false) Utils.exitWithMessage("A branch with that name does not exist.");
+            else {
+                //branch exist and not active one then remove it
+                branchStore.deleteBranch(branchName);
             }
         }
     }
-    // deleted: exist in last commit and not staged for delete and not exist in working tree
-    Commit LastCommit = getCurrentCommit();
-    TreeSet<String> StagingAreaRem = (stagingArea.GetNameOfFilesForRemoval().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForRemoval())));
-    TreeSet<String> WorkingTreeNames = new TreeSet<> (Arrays.asList(workingArea.NameOfFilesInWorkingArea()));
-    for (Map.Entry<String, String> entry : LastCommit.trackedFiles().entrySet()) {
-//            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
-        String FileName = entry.getKey();
-        if(!WorkingTreeNames.contains(FileName) && (StagingAreaRem == null || !StagingAreaRem.contains(FileName))) {
-            System.out.println(FileName + " (deleted) ");
-        }
+
+
+    private String getCurrentBranchName() {
+        return head.getHead();
     }
-    System.out.println();
+
+    public void status() {
+
+        // printing the branch names
+        checkGitletExistense();
+        System.out.println("=== Branches ===");
+        String CurrentBranchName = getCurrentBranchName();
+        for (String BranchName : branchStore.GetAllBranchesName()) {
+            if (CurrentBranchName.equals(BranchName)) System.out.print("*");
+            System.out.println(BranchName);
+        }
+        System.out.println();
+        // now printing staged Addition files
+        System.out.println("=== Staged Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForAddition()) {
+            System.out.println(filename);
+        }
+        System.out.println();
+        // now printing staged for removal files
+        System.out.println("=== Removed Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
+            System.out.println(filename);
+        }
+        System.out.println();
 
 
-    // now the untracked files
-    System.out.println("=== Untracked Files ===");
-    File[] files = workingArea.WorkingTreeFiles();
-    if (stagingArea.IsEmpty()) {
+        // now print the files that modified in working tree but not in the staging area
+        System.out.println("=== Modifications Not Staged For Commit ===");
+
+        // modified hashing changed from the one in Staging area
+        File[] WorkingTreeFiles = workingArea.WorkingTreeFiles();
+        Set<String> StagingAreaSet = (stagingArea.GetNameOfFilesForAddition().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForAddition())));
+
+        for (File file : WorkingTreeFiles) {
+            if (StagingAreaSet != null && StagingAreaSet.contains(file.getName())) {
+                String WorkingTreeFileHash = Utils.sha1(Utils.readContentsAsString(file));
+                String StagingAreaFileHash = Utils.readContentsAsString(new File(stagingArea.GetAdditionDir(), file.getName()));
+                if (!WorkingTreeFileHash.equals(StagingAreaFileHash)) {
+                    System.out.println(file.getName() + " (modified) ");
+                }
+            }
+        }
+        // deleted: exist in last commit and not staged for delete and not exist in working tree
+        Commit LastCommit = getCurrentCommit();
+        TreeSet<String> StagingAreaRem = (stagingArea.GetNameOfFilesForRemoval().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForRemoval())));
+        TreeSet<String> WorkingTreeNames = new TreeSet<>(Arrays.asList(workingArea.NameOfFilesInWorkingArea()));
+        for (Map.Entry<String, String> entry : LastCommit.trackedFiles().entrySet()) {
+//            System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+            String FileName = entry.getKey();
+            if (!WorkingTreeNames.contains(FileName) && (StagingAreaRem == null || !StagingAreaRem.contains(FileName))) {
+                System.out.println(FileName + " (deleted) ");
+            }
+        }
+        System.out.println();
+
+
+        // now the untracked files
+        System.out.println("=== Untracked Files ===");
+        File[] files = workingArea.WorkingTreeFiles();
+        if (stagingArea.IsEmpty()) {
+            for (File f : files) {
+                if (f.isDirectory()) continue;
+                System.out.println(f.getName());
+            }
+            System.out.println();
+            return;
+        }
+        TreeSet<String> fileSet = new TreeSet<>(Arrays.asList(stagingArea.GetAllFilesNames()));
         for (File f : files) {
+            if (fileSet.contains(f.getName())) continue;
             if (f.isDirectory()) continue;
             System.out.println(f.getName());
         }
         System.out.println();
-        return;
     }
-    TreeSet<String> fileSet = new TreeSet<>(Arrays.asList(stagingArea.GetAllFilesNames()));
-    for (File f : files) {
-        if (fileSet.contains(f.getName())) continue;
-        if (f.isDirectory()) continue;
-        System.out.println(f.getName());
+
+    public void addRemote(String remoteName, String remotePath) {
+        File remoteDir = new File(remotePath);
+        if (!remotePath.endsWith(".gitlet") || !remoteDir.isDirectory())
+            Utils.exitWithMessage("Invalid path for directory");
+
+        remoteStore.addRemotePath(remoteName, remotePath);
+
+
     }
-    System.out.println();
-}
 
-public void addRemote(String remoteName,String remotePath)
-{
-    File remoteDir = new File(remotePath);
-    if (!remotePath.endsWith(".gitlet")|| !remoteDir.isDirectory())  Utils.exitWithMessage("Invalid path for directory");
-       
-  remoteStore.addRemotePath(remoteName, remotePath);
+    public void removeRemote(String remoteName) {
+        remoteStore.removeRemotePath(remoteName);
+    }
 
+    //get active branch
+    private Branch getCurrentBranch() {
+        return branchStore.getBranch(head.getHead());
+    }
 
- 
-}
-public void removeRemote(String remoteName)
-{
- remoteStore.removeRemotePath(remoteName);       
-}
-  //get active branch
-  private Branch getCurrentBranch() 
-  { 
-    return branchStore.getBranch(head.getHead());
-  }
-//get current commit refered to by active branch
-private Commit getCurrentCommit()
-{
-  String curCommitHash=getCurrentBranch().getReferredCommitHash();
-return commitStore.getCommit(curCommitHash);
-}
+    //get current commit refered to by active branch
+    private Commit getCurrentCommit() {
+        String curCommitHash = getCurrentBranch().getReferredCommitHash();
+        return commitStore.getCommit(curCommitHash);
+    }
 }
