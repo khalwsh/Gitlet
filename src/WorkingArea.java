@@ -24,7 +24,23 @@ public class WorkingArea {
                 .map(fileName -> WORKING_DIR.resolve(fileName).toFile())
                 .collect(Collectors.toList());
     }
+    public void remove(String fileName) {
+        // Construct the file object
+        File file = Utils.join(Working_Dir, fileName);
 
+        // Check if the file exists
+        if (!file.exists()) {
+            System.out.println("File not found: " + file.getAbsolutePath());
+            return;
+        }
+
+        // Attempt to delete the file
+        if (!file.delete()) {
+            System.out.println("Failed to delete file: " + file.getAbsolutePath());
+        } else {
+            System.out.println("Successfully deleted file: " + file.getAbsolutePath());
+        }
+    }
     // Example definition of plainFilenamesIn
     private List<String> plainFilenamesIn(Path dir) {
         // Implementation to list file names in the directory
