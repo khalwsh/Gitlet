@@ -1,4 +1,4 @@
-
+import java.io.*;
 import java.util.*;
 import java.io.Serializable;
 public class Commit  implements Serializable {
@@ -43,11 +43,12 @@ public class Commit  implements Serializable {
     public String getParentCommitHash() {
         return parentHash;
     }
-
+    public TreeSet<String> getTrackedFilesSet() {
+        return new TreeSet<>(trackedFiles.keySet());
+    }
     public Map<String, String> trackedFiles() {
         return trackedFiles;
     }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
