@@ -100,6 +100,9 @@ public class Main {
             case "merge":
                 ValidateArgs(1, args.length - 1);
                 repository.merge(args[1]);
+            case "reset":
+                ValidateArgs(1, args.length - 1);
+                repository.reset(args[1]);
             default:
                 break;
         }
