@@ -646,6 +646,41 @@ public class Repository {
         remoteBranch.SetCommit(curCommitHash);
         remoteStore.saveRemoteBranch(remoteName, remoteBranch);
     }
+    private void checkoutCommit(Commit targetCommit) {
+        // Check for untracked files that could be overwritten
+        boolean hasUntrackedFiles = workingArea.allFiles().stream()
+                .map(File::getName)
+                .filter(fileName -> !getCurrentCommit().trackedFiles().containsKey(fileName))
+                .anyMatch(fileName -> targetCommit.trackedFiles().containsKey(fileName));
+
+        if (hasUntrackedFiles) {
+            Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        // Clear working and staging areas
+        workingArea.Clear();
+        stagingArea.clear();
+
+        // Checkout files from the target commit
+        targetCommit.trackedFiles().keySet().forEach(fileName -> CheckOutFileByHash(targetCommit.getCommitHash() , fileName));
+    }
+    public void reset(String commitHash) {
+        checkGitletExistense();
+
+        // Retrieve target commit
+        Commit targetCommit = commitStore.getCommit(commitHash);
+        if (targetCommit == null) {
+            Utils.exitWithMessage("No commit with that id exists.");
+        }
+
+        // Checkout the target commit
+        checkoutCommit(targetCommit);
+
+        // Update the current branch to point to the target commit
+        Branch currentBranch = getCurrentBranch();
+        currentBranch.SetCommit(targetCommit.getCommitHash());
+        branchStore.saveBranch(currentBranch);
+    }
 }
 
 
