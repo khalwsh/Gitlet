@@ -8,7 +8,15 @@ public class Commit  implements Serializable {
     private String parentHash;
     private String currentHash;
     private Map<String, String> trackedFiles = new TreeMap();
-
+    public Date GetTime(){
+        return this.timeStamp;
+    }
+    public String GetParent(){
+        return parentHash;
+    }
+    public String getSecondryParent(){
+        return secondryParentHash;
+    }
     public Commit(Date timeStamp, String message, String secondryParentHash, String parentHash, Map<String, String> trackedFiles) {
 
         this.timeStamp = timeStamp;
