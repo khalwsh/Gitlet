@@ -1,4 +1,4 @@
-
+import java.io.*;
 import java.util.*;
 import java.io.Serializable;
 public class Commit  implements Serializable {
@@ -8,7 +8,15 @@ public class Commit  implements Serializable {
     private String parentHash;
     private String currentHash;
     private Map<String, String> trackedFiles = new TreeMap();
-
+    public Date GetTime(){
+        return this.timeStamp;
+    }
+    public String GetParent(){
+        return parentHash;
+    }
+    public String getSecondryParent(){
+        return secondryParentHash;
+    }
     public Commit(Date timeStamp, String message, String secondryParentHash, String parentHash, Map<String, String> trackedFiles) {
 
         this.timeStamp = timeStamp;
@@ -43,11 +51,12 @@ public class Commit  implements Serializable {
     public String getParentCommitHash() {
         return parentHash;
     }
-
+    public TreeSet<String> getTrackedFilesSet() {
+        return new TreeSet<>(trackedFiles.keySet());
+    }
     public Map<String, String> trackedFiles() {
         return trackedFiles;
     }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
