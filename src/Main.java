@@ -92,6 +92,9 @@ public class Main {
             case "reset":
                 ValidateArgs(1, args.length - 1);
                 repository.reset(args[1]);
+            case "merge":
+                ValidateArgs(1 , args.length - 1);
+                repository.merge(args[1]);
             default:
                 Utils.exitWithMessage("Incorrect Command");
         }

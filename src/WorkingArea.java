@@ -123,4 +123,19 @@ public class WorkingArea {
 //        }
         return Working_Dir.list();
     }
+    public boolean deleteFile(String fileName) {
+        File file = getFile(fileName);
+        if (file == null) return false;
+        return file.delete();
+    }
+    public File getFile(String fileName) {
+        File file = Utils.join(Working_Dir, fileName);
+        return file.exists() ? file : null;
+    }
+
+    public File saveFile(String contents, String fileName) {
+        File file = Utils.join(Working_Dir, fileName);
+        Utils.writeContents(file, contents);
+        return file;
+    }
 }
