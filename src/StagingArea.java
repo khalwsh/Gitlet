@@ -8,21 +8,25 @@ public class StagingArea {
     public File[] GetFilesForAddition() {
         return Addition_Dir.listFiles(file -> file.isFile());
     }
-    public String[] GetNameOfFilesForAddition(){
+
+    public String[] GetNameOfFilesForAddition() {
         return Addition_Dir.list();
     }
+
     public File[] GetFilesForRemoval() {
         return Removal_Dir.listFiles();
 
     }
+
     public String[] GetNameOfFilesForRemoval() {
-       return Removal_Dir.list();
+        return Removal_Dir.list();
     }
-    public String[] GetAllFilesNames(){
+
+    public String[] GetAllFilesNames() {
         // Get file names from both directories
         String[] additionFiles = GetNameOfFilesForAddition();
         String[] removalFiles = GetNameOfFilesForRemoval();
-        if(additionFiles.length == 0 && removalFiles.length == 0){
+        if (additionFiles.length == 0 && removalFiles.length == 0) {
             return null;
         }
         // Handle null cases (in case directories are empty or invalid)
@@ -44,6 +48,7 @@ public class StagingArea {
 
         return allFiles;
     }
+
     public boolean IsEmpty() {
         return GetFilesForAddition().length == 0 && GetFilesForRemoval().length == 0;
     }
@@ -53,8 +58,30 @@ public class StagingArea {
         this.Removal_Dir = Removal_Dir;
 
     }
+    public boolean isTracked(String fileName){
+        for(String name : GetNameOfFilesForAddition()){
+            if(name.equals(fileName)){
+                return true;
+            }
+        }
+        return false;
+    }
+    //this method check if file that exist in working directory is the same as in staging area
+    public boolean checkBlobExistense(String targetedNameFile, String blobHash) {
 
-   
+        File file = Utils.join(this.Addition_Dir, targetedNameFile);
+
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            System.out.println("Error creating file: " + e.getMessage());
+        }
+
+
+        String fileContent = Utils.readContentsAsString(file);
+        return fileContent.equals(blobHash);
+    }
+
     //Addition_Dir=>fileName=>Sha-1
     public void stageForAddition(String fileName, String hash) {
         File file = Utils.join(this.Addition_Dir, fileName);
@@ -85,14 +112,19 @@ public class StagingArea {
         File file = Utils.join(Addition_Dir, fileName);
         return file.exists();
     }
-    public File GetAdditionDir(){
+
+    public File GetAdditionDir() {
         return this.Addition_Dir;
     }
 
     public void clear() {
-        for (File file : GetFilesForAddition()) {
+        File[] files = GetFilesForAddition();
+        if(files == null)return;
+        for (File file : files) {
             file.delete();
         }
+        files = GetFilesForRemoval();
+        if(files == null)return;
         for (File file : GetFilesForRemoval()) {
             file.delete();
         }

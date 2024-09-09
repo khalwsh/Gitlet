@@ -11,17 +11,17 @@ public class Main {
         Repository repository = new Repository(System.getProperty("user.dir"));
 
 
-    switch (command) {
-        case "init":
+        switch (command) {
+            case "init":
                 ValidateArgs(0, args.length - 1);
 
                 repository.init();
 
-                  break;
-        case "add":
-             ValidateArgs(1, args.length-1);
-             repository.add(args[1]); 
-             break;
+                break;
+            case "add":
+                ValidateArgs(1, args.length - 1);
+                repository.add(args[1]);
+                break;
 
         
         case "commit":
@@ -111,5 +111,5 @@ public class Main {
     private static void ValidateArgs(int n, int argsLength) {
         if (argsLength != n) Utils.exitWithMessage("Incorrect Operands");
     }
- 
+
 }
