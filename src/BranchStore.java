@@ -31,20 +31,18 @@ public class BranchStore {
         File branchFile = Utils.join(Branches_Dir, branchName);
         if (!branchFile.exists()) return null;
         return Utils.readObject(branchFile, Branch.class);
-       }
+    }
 
-       public ArrayList<Commit> getBranchHistory(Commit curCommit, CommitStore commitStore)
-       {
-                ArrayList<Commit>listOfCommits=new ArrayList<Commit>();
-                
-                    listOfCommits.add(curCommit);
-                    
-                  while (curCommit.getParentCommitHash()!=null) {
+    public ArrayList<Commit> getBranchHistory(Commit currCommit, CommitStore commitStore) {
+        ArrayList<Commit> listOfCommits = new ArrayList<Commit>();
 
-                   Commit prevCommit=getPreviousCommit(curCommit, commitStore);
+        listOfCommits.add(currCommit);
+        while (currCommit.getParentCommitHash() != null) {
+
+                   Commit prevCommit=getPreviousCommit(currCommit, commitStore);
                    if(prevCommit==null) break;
                     listOfCommits.add(prevCommit);
-                    curCommit=prevCommit;
+                    currCommit=prevCommit;
                   }
                   
                 return listOfCommits;

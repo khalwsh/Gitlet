@@ -3,10 +3,11 @@ import java.io.File;
 
 public class RemoteStore {
     private final File Remote_Dir;
-    public RemoteStore(File Remote_Dir)
-    {
-         this.Remote_Dir=Remote_Dir;
+
+    public RemoteStore(File Remote_Dir) {
+        this.Remote_Dir = Remote_Dir;
     }
+
     //just create new file with remote name and path to it
    public void addRemotePath(String remoteName, String remotePath) {
     // Create the directory for the remote
