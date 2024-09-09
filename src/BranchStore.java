@@ -39,10 +39,10 @@ public class BranchStore {
         listOfCommits.add(currCommit);
         while (currCommit.getParentCommitHash() != null) {
 
-                   Commit prevCommit=getPreviousCommit(curCommit, commitStore);
+                   Commit prevCommit=getPreviousCommit(currCommit, commitStore);
                    if(prevCommit==null) break;
                     listOfCommits.add(prevCommit);
-                    curCommit=prevCommit;
+                    currCommit=prevCommit;
                   }
                   
                 return listOfCommits;
