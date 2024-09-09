@@ -54,22 +54,7 @@ public class StagingArea {
 
     }
 
-    //this method check if file that exist in working directory is the same as in staging area
-    public boolean checkBlobExistense(String targetedNameFile, String blobHash) {
-
-        File file = Utils.join(this.Addition_Dir, targetedNameFile);
-
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            System.out.println("Error creating file: " + e.getMessage());
-        }
-
-
-        String fileContent = Utils.readContentsAsString(file);
-        return fileContent.equals(blobHash);
-    }
-
+   
     //Addition_Dir=>fileName=>Sha-1
     public void stageForAddition(String fileName, String hash) {
         File file = Utils.join(this.Addition_Dir, fileName);

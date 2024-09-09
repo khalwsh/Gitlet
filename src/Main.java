@@ -6,7 +6,7 @@ public class Main {
         if (args.length == 0) {
             Utils.exitWithMessage("Please Enter command.");
         }
-        String command = args[0], message, fileName, branchName;
+        String command =args[0];
 
         Repository repository = new Repository(System.getProperty("user.dir"));
 
@@ -24,37 +24,37 @@ public class Main {
              break;
 
         
-             case "commit":
+        case "commit":
             ValidateArgs(1, args.length-1);
             repository.commit(args[1]);
             break;
 
          
-            case "log":
+        case "log":
             ValidateArgs(0, args.length-1);
             repository.log();
             break;
         
-            case "global-log":
+        case "global-log":
                ValidateArgs(0, args.length-1);
                repository.globallog();
                break;
 
-            case "find":
+        case "find":
              ValidateArgs(1, args.length-1);
              repository.find(args[1]);
              break;
-            case "rm":
+        case "rm":
                ValidateArgs(1, args.length-1);
                repository.rm(args[1]);
                break;
 
-         case "status":
+        case "status":
            ValidateArgs(0, args.length-1);
            repository.status();
            break;
 
-            case "checkout":
+        case "checkout":
          
                if(args.length==3 &&args[1].equals("--"))
                {
@@ -84,16 +84,24 @@ public class Main {
                ValidateArgs(1, args.length-1);
                repository.rmbranch(args[1]);
                break;
-       case "add-remote":
+        case "add-remote":
             
               ValidateArgs(2, args.length-1);   
                repository.addRemote(args[1],args[2]);
                break;
        case "rm-remote":
-       ValidateArgs(1, args.length-1);
-       repository.removeRemote(args[1]);
-       break;
-       
+              ValidateArgs(1, args.length-1);
+              repository.removeRemote(args[1]);
+            break;
+        case "push":
+              ValidateArgs(2, args.length-1);
+            repository.push(args[1],args[2]);
+            break;
+       case "fetch":
+                 ValidateArgs(2, args.length-1);
+            repository.fetch(args[1],args[2]);
+            break;
+
          default:
             break;
        }
