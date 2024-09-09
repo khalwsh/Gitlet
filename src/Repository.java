@@ -103,7 +103,7 @@ public class Repository {
         String committedFileHash = getCurrentCommit().trackedFiles().get(fileName);
         String workingFileHash = Utils.sha1(Utils.readContentsAsString(currentFile));
         if (!workingFileHash.equals(committedFileHash)) {
-            stagingArea.stageForAddition(fileName,workingFileHash);
+            stagingArea.stageForAddition(fileName, workingFileHash);
             blobStore.saveBlob(currentFile);
         } else {
             stagingArea.UnStageForAddittion(fileName);
@@ -128,7 +128,7 @@ public class Repository {
             ; //untracked and not staged for addition
         } else {
             if (checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
-            ///add last commited file version to staged for removal 
+            ///add last commited file version to staged for removal
             stagingArea.StageForRemoval(fileName, fileHash);
             ///remove current file version form CWD
             workingArea.removeFromCWD(fileName);
@@ -175,7 +175,6 @@ public class Repository {
         System.out.println("there is no commit with this message");
     }
 
-   
 
     public void commit(String Message) {
         checkGitletExistense(); // check repo is initialized
@@ -314,32 +313,33 @@ public class Repository {
     }
 
 
-private String getCurrentBranchName(){
-    return head.getHead();
-}
-public void status() {
+    private String getCurrentBranchName() {
+        return head.getHead();
+    }
 
-    // printing the branch names
-    checkGitletExistense();
-    System.out.println("=== Branches ===");
-    String CurrentBranchName =head.getHead();
-    for (String BranchName : branchStore.GetAllBranchesName()) {
-        if (CurrentBranchName.equals(BranchName)) System.out.print("*");
-        System.out.println(BranchName);
-    }
-    System.out.println();
-    // now printing staged Addition files
-    System.out.println("=== Staged Files ===");
-    for (String filename : stagingArea.GetNameOfFilesForAddition()) {
-        System.out.println(filename);
-    }
-    System.out.println();
-    // now printing staged for removal files
-    System.out.println("=== Removed Files ===");
-    for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
-        System.out.println(filename);
-    }
-    System.out.println();
+    public void status() {
+
+        // printing the branch names
+        checkGitletExistense();
+        System.out.println("=== Branches ===");
+        String CurrentBranchName = head.getHead();
+        for (String BranchName : branchStore.GetAllBranchesName()) {
+            if (CurrentBranchName.equals(BranchName)) System.out.print("*");
+            System.out.println(BranchName);
+        }
+        System.out.println();
+        // now printing staged Addition files
+        System.out.println("=== Staged Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForAddition()) {
+            System.out.println(filename);
+        }
+        System.out.println();
+        // now printing staged for removal files
+        System.out.println("=== Removed Files ===");
+        for (String filename : stagingArea.GetNameOfFilesForRemoval()) {
+            System.out.println(filename);
+        }
+        System.out.println();
 
 
         // now print the files that modified in working tree but not in the staging area
@@ -392,6 +392,7 @@ public void status() {
         System.out.println();
     }
 
+    public void merge(String branchName) {
         Branch targetBranch = branchStore.getBranch(branchName);
         if (targetBranch == null) {
             Utils.exitWithMessage("A branch with that name does not exist.");
@@ -428,7 +429,7 @@ public void status() {
 
         ALL.forEach(fileName -> {
             final String SPLIT = SPLIT_COMMIT.trackedFiles().get(fileName);
-            final String HEAD  = HEAD_COMMIT.trackedFiles().get(fileName);
+            final String HEAD = HEAD_COMMIT.trackedFiles().get(fileName);
             final String OTHER = OTHER_COMMIT.trackedFiles().get(fileName);
 
             if (SPLIT != null && OTHER != null && !SPLIT.equals(OTHER) && SPLIT.equals(HEAD)) {
@@ -472,7 +473,7 @@ public void status() {
             if (SPLIT != null && SPLIT.equals(HEAD) && OTHER == null) {
                 // deleted from the other branch but not changed in the current branch
                 File temp = workingArea.getFile(fileName);
-                if(temp != null) {
+                if (temp != null) {
                     stagingArea.StageForRemoval(fileName, Utils.sha1(temp));
                     workingArea.deleteFile(fileName);
                 }
@@ -489,6 +490,7 @@ public void status() {
             Utils.exitWithMessage("Encountered a merge conflict.");
         }
     }
+
     private Commit splitPoint(Branch a, Branch b) {
         Commit A = commitStore.getCommit(a.getReferredCommitHash());
         Commit B = commitStore.getCommit(b.getReferredCommitHash());
@@ -496,10 +498,10 @@ public void status() {
         Set<String> setb = getCommitTree(B).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
         Date LcaDate = new Date(0);
         Commit Point = null;
-        for(String sa : seta){
-            if(setb.contains(sa)){
+        for (String sa : seta) {
+            if (setb.contains(sa)) {
                 Commit x = commitStore.getCommit(sa);
-                if(x.GetTime().after(LcaDate)){
+                if (x.GetTime().after(LcaDate)) {
                     LcaDate = x.GetTime();
                     Point = x;
                 }
@@ -507,6 +509,7 @@ public void status() {
         }
         return Point;
     }
+
     private List<Commit> getCommitTree(Commit rootCommit) {
         List<Commit> result = new ArrayList<>();
         DFS(rootCommit, new HashSet<>(), result);
@@ -528,126 +531,122 @@ public void status() {
             DFS(commitStore.getCommit(secondaryParent), visited, list);
         }
     }
-public void addRemote(String remoteName,String remotePath)
-{
-    //check if local and remote .gitlet folder exist
-checkGitletExistense();
-checkRemoteGitletExistenseAndPathValidity(remotePath);
-       
-  remoteStore.addRemotePath(remoteName, remotePath);
-}
-public void removeRemote(String remoteName)
-{
-    checkGitletExistense();
 
- remoteStore.removeRemotePath(remoteName);       
-}
-/////////////////
-public void push(String remoteName,String remoteBranchName)
-{
-    //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
-    checkGitletExistense();
-       String remotePath= remoteStore.getRemotePath(remoteName);
-        if(remotePath==null) Utils.exitWithMessage("Remote file is not exist");
-    checkRemoteGitletExistenseAndPathValidity(remotePath);
-         ///get remote  branch into memory
-        Branch remoteBranch=remoteStore.getRemoteBranch(remoteName, remoteBranchName);
+    public void addRemote(String remoteName, String remotePath) {
+        //check if local and remote .gitlet folder exist
+        checkGitletExistense();
+        checkRemoteGitletExistenseAndPathValidity(remotePath);
+
+        remoteStore.addRemotePath(remoteName, remotePath);
+    }
+
+    public void removeRemote(String remoteName) {
+        checkGitletExistense();
+
+        remoteStore.removeRemotePath(remoteName);
+    }
+
+    /////////////////
+    public void push(String remoteName, String remoteBranchName) {
+        //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
+        checkGitletExistense();
+        String remotePath = remoteStore.getRemotePath(remoteName);
+        if (remotePath == null) Utils.exitWithMessage("Remote file is not exist");
+        checkRemoteGitletExistenseAndPathValidity(remotePath);
+        ///get remote  branch into memory
+        Branch remoteBranch = remoteStore.getRemoteBranch(remoteName, remoteBranchName);
         ///check if remote head is an ancestor of local branch history
-        ///if yes then push to remote 
+        ///if yes then push to remote
         /// otherwise you must pull before push
         Map.Entry<Boolean, ArrayList<Commit>>
-        checkAncestor=branchStore.checkIsAncestor(remoteName,remoteBranch, getCurrentCommit(), commitStore,remoteStore);
-        if(!checkAncestor.getKey()) Utils.exitWithMessage("Please pull down remote changes before pushing.");
-        else
-        {//copy commits and blobs from local to remote
+                checkAncestor = branchStore.checkIsAncestor(remoteName, remoteBranch, getCurrentCommit(), commitStore, remoteStore);
+        if (!checkAncestor.getKey()) Utils.exitWithMessage("Please pull down remote changes before pushing.");
+        else {//copy commits and blobs from local to remote
             String gitletPath = System.getProperty("user.dir");
             Path localCommitsPath = Paths.get(gitletPath, ".gitlet", "commits");
             Path localBlobsPath = Paths.get(gitletPath, ".gitlet", "blobs");
-          
+
             Path remoteCommitsPath = Paths.get(remotePath, "commits");
             Path remoteBlobsPath = Paths.get(remotePath, "blobs");
 
             branchStore.CopyFromSrcToDist
-            (localCommitsPath.toString(), localBlobsPath.toString(),remoteCommitsPath.toString() , remoteBlobsPath.toString(),checkAncestor.getValue()); 
-       
-       //now set remote head to current commit
-         FastForward(remoteName,remoteBranch);
+                    (localCommitsPath.toString(), localBlobsPath.toString(), remoteCommitsPath.toString(), remoteBlobsPath.toString(), checkAncestor.getValue());
+
+            //now set remote head to current commit
+            FastForward(remoteName, remoteBranch);
         }
-}
+    }
 
-void fetch(String remoteName,String remoteBranchName)
-{
-    //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
-    checkGitletExistense();
-       String remotePath= remoteStore.getRemotePath(remoteName);
-        if(remotePath==null) Utils.exitWithMessage("Remote file is not exist");
-    checkRemoteGitletExistenseAndPathValidity(remotePath);
+    void fetch(String remoteName, String remoteBranchName) {
+        //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
+        checkGitletExistense();
+        String remotePath = remoteStore.getRemotePath(remoteName);
+        if (remotePath == null) Utils.exitWithMessage("Remote file is not exist");
+        checkRemoteGitletExistenseAndPathValidity(remotePath);
 
-    ///check remote branch 
-    Branch remoteBranch=remoteStore.getRemoteBranch(remoteName, remoteBranchName);
-    if(remoteBranch==null) Utils.exitWithMessage("That remote does not have that branch.");
-    ////get local active branch history
-    ArrayList<Commit>listOfLocalCommits=branchStore.getBranchHistory(getCurrentCommit(), commitStore);
-         Map<String,Boolean>listOfLocalStoredCommits=new TreeMap<>();
-         for (Commit commit : listOfLocalCommits) {
+        ///check remote branch
+        Branch remoteBranch = remoteStore.getRemoteBranch(remoteName, remoteBranchName);
+        if (remoteBranch == null) Utils.exitWithMessage("That remote does not have that branch.");
+        ////get local active branch history
+        ArrayList<Commit> listOfLocalCommits = branchStore.getBranchHistory(getCurrentCommit(), commitStore);
+        Map<String, Boolean> listOfLocalStoredCommits = new TreeMap<>();
+        for (Commit commit : listOfLocalCommits) {
             listOfLocalStoredCommits.put(commit.getCommitHash(), true);
-         }
-         Commit remoteHead=remoteStore.getRemoteCommit(remoteBranch.getReferredCommitHash(),remoteName);
+        }
+        Commit remoteHead = remoteStore.getRemoteCommit(remoteBranch.getReferredCommitHash(), remoteName);
 
-         ArrayList<Commit>listOfRemoteCommits=branchStore.getRemoteBranchHistory(remoteHead,remoteName,remoteStore);
-         ArrayList<Commit>copiedCommits=new ArrayList<>();
-           for (Commit commit : listOfRemoteCommits) {
-            String remoteCommitHash=commit.getCommitHash();
-            Boolean difference=listOfLocalStoredCommits.get(remoteCommitHash);
-              if(difference==null) copiedCommits.add(commit);
-           }
-           //copy commits and blobs from remote to local
-           String gitletPath = System.getProperty("user.dir");
-           Path localCommitsPath = Paths.get(gitletPath, ".gitlet", "commits");
-           Path localBlobsPath = Paths.get(gitletPath, ".gitlet", "blobs");
-         
-           Path remoteCommitsPath = Paths.get(remotePath, "commits");
-           Path remoteBlobsPath = Paths.get(remotePath, "blobs");
+        ArrayList<Commit> listOfRemoteCommits = branchStore.getRemoteBranchHistory(remoteHead, remoteName, remoteStore);
+        ArrayList<Commit> copiedCommits = new ArrayList<>();
+        for (Commit commit : listOfRemoteCommits) {
+            String remoteCommitHash = commit.getCommitHash();
+            Boolean difference = listOfLocalStoredCommits.get(remoteCommitHash);
+            if (difference == null) copiedCommits.add(commit);
+        }
+        //copy commits and blobs from remote to local
+        String gitletPath = System.getProperty("user.dir");
+        Path localCommitsPath = Paths.get(gitletPath, ".gitlet", "commits");
+        Path localBlobsPath = Paths.get(gitletPath, ".gitlet", "blobs");
 
-           branchStore.CopyFromSrcToDist
-           (remoteCommitsPath.toString(), remoteBlobsPath.toString(),localCommitsPath.toString() , localBlobsPath.toString(),copiedCommits); 
-            ///create remote branch in remotes dir at local and save remote branch object
-           remoteStore.saveRemoteBranchFile(remoteName, remoteBranch);
+        Path remoteCommitsPath = Paths.get(remotePath, "commits");
+        Path remoteBlobsPath = Paths.get(remotePath, "blobs");
 
-}
+        branchStore.CopyFromSrcToDist
+                (remoteCommitsPath.toString(), remoteBlobsPath.toString(), localCommitsPath.toString(), localBlobsPath.toString(), copiedCommits);
+        ///create remote branch in remotes dir at local and save remote branch object
+        remoteStore.saveRemoteBranchFile(remoteName, remoteBranch);
 
-
+    }
 
 
+    //get active branch
+    private Branch getCurrentBranch() {
+        return branchStore.getBranch(head.getHead());
+    }
 
-  //get active branch
-  private Branch getCurrentBranch() 
-  { 
-    return branchStore.getBranch(head.getHead());
-  }
-//get current commit refered to by active branch
-private Commit getCurrentCommit()
-{
-  String curCommitHash=getCurrentBranch().getReferredCommitHash();
-return commitStore.getCommit(curCommitHash);
-}
+    //get current commit refered to by active branch
+    private Commit getCurrentCommit() {
+        String curCommitHash = getCurrentBranch().getReferredCommitHash();
+        return commitStore.getCommit(curCommitHash);
+    }
 
-private void checkGitletExistense()
- {
-    if (!Gitlet_Dir.exists()) 
-    {
-        Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
+    private void checkGitletExistense() {
+        if (!Gitlet_Dir.exists()) {
+            Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
+        }
+    }
+
+    private void checkRemoteGitletExistenseAndPathValidity(String remotePath) {
+        File remoteDir = new File(remotePath);
+        if (!remotePath.endsWith(".gitlet") || !remoteDir.isDirectory())
+            Utils.exitWithMessage("Remote directory not found.");
+    }
+
+    private void FastForward(String remoteName, Branch remoteBranch) {
+        String curCommitHash = getCurrentCommit().getCommitHash();
+        remoteBranch.SetCommit(curCommitHash);
+        remoteStore.saveRemoteBranch(remoteName, remoteBranch);
     }
 }
-private void checkRemoteGitletExistenseAndPathValidity(String remotePath)
-{
-    File remoteDir = new File(remotePath);
-    if (!remotePath.endsWith(".gitlet")|| !remoteDir.isDirectory())  Utils.exitWithMessage("Remote directory not found.");
-}
-private void FastForward(String remoteName,Branch remoteBranch)
-{
-    String curCommitHash=getCurrentCommit().getCommitHash();
-    remoteBranch.SetCommit(curCommitHash);
-    remoteStore.saveRemoteBranch(remoteName, remoteBranch);
-}
-}
+
+
+
