@@ -3,12 +3,19 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.sql.Time;
+import java.util.*;
+import java.time.Instant;
 
 public class Repository {
     private final File CWD;
@@ -392,7 +399,174 @@ public void status() {
     }
     System.out.println();
 }
+public void merge(String branchName) {
+//        1- Any files that have been modified in the given branch since the split point,
+//        but not modified in the current branch since the split point should be changed to their versions in the given branch (checked out from the commit at the front of the given branch).
+//        These files should then all be automatically staged. To clarify,
+//        if a file is “modified in the given branch since the split point”
+//        this means the version of the file as it exists in the commit at the front of the given branch has different content from the version of the file at the split point.
+//
+//        2- Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are.
+//
+//        3- Any files that have been modified in both the current and given branch in the same way
+//        (i.e., both files now have the same content or were both removed) are left unchanged by the merge.
+//        If a file was removed from both the current and given branch, but a file of the same name is present in the working directory,
+//        it is left alone and continues to be absent (not tracked nor staged) in the merge.
+//
+//        4- Any files that were not present at the split point and are present only in the current branch should remain as they are.
+//
+//        5- Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
+//
+//        6- Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
+//
+//        7- Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.
+//
+//        8- Any files modified in different ways in the current and given branches are in conflict.
+//        “Modified in different ways” can mean that the contents of both are changed and different from other,
+//        or the contents of one are changed and the other file is deleted, or the file was absent at the split point and has different contents in the given and current branches.
+//        In this case, replace the contents of the conflicted file with
+        
+        checkGitletExistense();
+        if (!stagingArea.IsEmpty()) {
+            Utils.exitWithMessage("You have uncommitted changes.");
+        }
 
+        Branch targetBranch = branchStore.getBranch(branchName);
+        if (targetBranch == null) {
+            Utils.exitWithMessage("A branch with that name does not exist.");
+        }
+
+        Branch currentBranch = getCurrentBranch();
+        if (targetBranch.getName().equals(currentBranch.getName())) {
+            Utils.exitWithMessage("Cannot merge a branch with itself.");
+        }
+
+        if (workingArea.allFiles().stream().anyMatch(file -> !getCurrentCommit().trackedFiles().containsKey(file.getName()))) {
+            Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+        }
+
+        final Commit HEAD_COMMIT = commitStore.getCommit(currentBranch.getReferredCommitHash());
+        final Commit OTHER_COMMIT = commitStore.getCommit(targetBranch.getReferredCommitHash());
+        final Commit SPLIT_COMMIT = splitPoint(currentBranch, targetBranch);
+
+        if (SPLIT_COMMIT.equals(OTHER_COMMIT)) {
+            Utils.exitWithMessage("Given branch is an ancestor of the current branch.");
+        }
+
+        if (SPLIT_COMMIT.equals(HEAD_COMMIT)) {
+            CheckOutBranch(targetBranch.getName());
+            Utils.exitWithMessage("Current branch fast-forwarded.");
+        }
+
+        Set<String> ALL = new HashSet<>();
+        ALL.addAll(SPLIT_COMMIT.trackedFiles().keySet());
+        ALL.addAll(HEAD_COMMIT.trackedFiles().keySet());
+        ALL.addAll(OTHER_COMMIT.trackedFiles().keySet());
+
+        AtomicBoolean isConflict = new AtomicBoolean(false);
+
+        ALL.forEach(fileName -> {
+            final String SPLIT = SPLIT_COMMIT.trackedFiles().get(fileName);
+            final String HEAD  = HEAD_COMMIT.trackedFiles().get(fileName);
+            final String OTHER = OTHER_COMMIT.trackedFiles().get(fileName);
+
+            if (SPLIT != null && OTHER != null && !SPLIT.equals(OTHER) && SPLIT.equals(HEAD)) {
+                // file in split commit and in the Other branch and the file changed but didn't change in the current branch
+                String contents = blobStore.getBlobContent(OTHER);
+                workingArea.saveFile(contents, fileName);
+                stagingArea.stageForAddition(blobStore.getBlobContent(OTHER), fileName);
+            }
+
+            if (SPLIT != null && HEAD != null && !SPLIT.equals(HEAD) && SPLIT.equals(OTHER)) {
+                // file in split commit and in the current branch and the file changed but didn't change in the other branch
+                workingArea.saveFile(blobStore.getBlobContent(HEAD), fileName);
+            }
+
+            if (!Objects.equals(SPLIT, HEAD) && !Objects.equals(SPLIT, OTHER) && !Objects.equals(HEAD, OTHER)) {
+                /* conflict */
+                String headContents = (HEAD != null ? blobStore.getBlobContent(HEAD) : "");
+                String otherContents = (OTHER != null ? blobStore.getBlobContent(OTHER) : "");
+                String contents = "<<<<<<< HEAD\n" +
+                        headContents +
+                        "=======\n" +
+                        otherContents +
+                        ">>>>>>>\n";
+                workingArea.saveFile(contents, fileName);
+                stagingArea.stageForAddition(contents, fileName);
+                isConflict.set(true);
+            }
+
+            if (SPLIT == null && OTHER == null && HEAD != null) {
+                // exist only in the current branch
+                workingArea.saveFile(blobStore.getBlobContent(HEAD), fileName);
+            }
+
+            if (SPLIT == null && HEAD == null && OTHER != null) {
+                // exist only in the other branch
+                String contents = blobStore.getBlobContent(OTHER);
+                workingArea.saveFile(contents, fileName);
+                stagingArea.stageForAddition(blobStore.getBlobContent(OTHER), fileName);
+            }
+
+            if (SPLIT != null && SPLIT.equals(HEAD) && OTHER == null) {
+                // deleted from the other branch but not changed in the current branch
+                File temp = workingArea.getFile(fileName);
+                if(temp != null) {
+                    stagingArea.StageForRemoval(fileName, Utils.sha1(temp));
+                    workingArea.deleteFile(fileName);
+                }
+            }
+
+            if (SPLIT != null && SPLIT.equals(OTHER) && HEAD == null) {
+                /* leave the file removed */
+            }
+        });
+
+        String commitMessage = String.format("Merged %s into %s.", targetBranch.getName(), currentBranch.getName());
+        commit(commitMessage, OTHER_COMMIT.getCommitHash());
+        if (isConflict.get()) {
+            Utils.exitWithMessage("Encountered a merge conflict.");
+        }
+    }
+    private Commit splitPoint(Branch a, Branch b) {
+        Commit A = commitStore.getCommit(a.getReferredCommitHash());
+        Commit B = commitStore.getCommit(b.getReferredCommitHash());
+        Set<String> seta = getCommitTree(A).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
+        Set<String> setb = getCommitTree(B).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
+        Date LcaDate = new Date(0);
+        Commit Point = null;
+        for(String sa : seta){
+            if(setb.contains(sa)){
+                Commit x = commitStore.getCommit(sa);
+                if(x.GetTime().after(LcaDate)){
+                    LcaDate = x.GetTime();
+                    Point = x;
+                }
+            }
+        }
+        return Point;
+    }
+    private List<Commit> getCommitTree(Commit rootCommit) {
+        List<Commit> result = new ArrayList<>();
+        DFS(rootCommit, new HashSet<>(), result);
+        return result;
+    }
+
+    private void DFS(Commit node, Set<String> visited, List<Commit> list) {
+        list.add(node);
+        visited.add(node.getCommitHash());
+
+        String primaryParent = node.GetParent();
+        String secondaryParent = node.getSecondryParent();
+
+        if (primaryParent != null && !visited.contains(primaryParent)) {
+            DFS(commitStore.getCommit(primaryParent), visited, list);
+        }
+
+        if (secondaryParent != null && !visited.contains(secondaryParent)) {
+            DFS(commitStore.getCommit(secondaryParent), visited, list);
+        }
+    }
 public void addRemote(String remoteName,String remotePath)
 {
     //check if local and remote .gitlet folder exist
