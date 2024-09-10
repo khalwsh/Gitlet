@@ -24,7 +24,6 @@ In Gilet we support branching and have different history of commits derived from
 
 1 - Install Java : https://adoptium.net
 
-2 - Install Git : http://git-scm.com/download/
 
 ## How To Run
 
