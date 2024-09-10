@@ -22,7 +22,7 @@ In Gilet we support branching and have different history of commits derived from
  
 ## Dependencies
 
-1 - Install Java : https://adoptium.net
+1 - Install Java : https://www.java.com/en/download/
 
 
 ## How To Run
