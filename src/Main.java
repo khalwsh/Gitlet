@@ -80,6 +80,14 @@ public class Main {
                 ValidateArgs(1, args.length - 1);
                 repository.rmbranch(args[1]);
                 break;
+            case "merge":
+                ValidateArgs(1, args.length - 1);
+                repository.merge(args[1],null);
+                break;
+            case "reset":
+                ValidateArgs(1, args.length - 1);
+                repository.reset(args[1]);
+                break;
             case "add-remote":
 
                 ValidateArgs(2, args.length - 1);
@@ -95,14 +103,11 @@ public class Main {
                 break;
             case "fetch":
                 ValidateArgs(2, args.length - 1);
-                repository.fetch(args[1], args[2]);
+                repository.fetch(args[1],args[2]);
                 break;
-            case "merge":
-                ValidateArgs(1, args.length - 1);
-                repository.merge(args[1]);
-            case "reset":
-                ValidateArgs(1, args.length - 1);
-                repository.reset(args[1]);
+            case "pull":
+                //ValidateArgs(2, args.length-1);
+                repository.pull("origin","master");
             default:
                 break;
         }

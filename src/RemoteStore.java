@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.io.IOException;
 
 public class RemoteStore {
     private final File Remote_Dir;
@@ -55,7 +56,15 @@ public class RemoteStore {
         return remoteBranch;
           
     }
-    public void saveRemoteBranchFile(String remoteName,Branch remoteBranch)
+    public Branch getRemoteBranchFromLocal(String remoteName,String remoteBranch)
+    {
+        File remoteBranchFile=Utils.join(Remote_Dir, remoteName,remoteBranch);
+        if(!remoteBranchFile.exists()) return null;
+        Branch branch= Utils.readObject(remoteBranchFile,Branch.class);
+        return branch;
+    }
+
+    public void saveRemoteBranchAtLocal(String remoteName,Branch remoteBranch)
     {
         File remoteBranchFile=Utils.join(Remote_Dir, remoteName,remoteBranch.getName());
           Utils.writeObject(remoteBranchFile,remoteBranch);
@@ -79,11 +88,12 @@ public class RemoteStore {
 
      File currentCommitFile=Utils.join(remotePath,"commits", commitHash);
      
+    
     //////java.lang.IllegalArgumentException here
-         if(currentCommitFile.exists())
+         
          return Utils.readObject(currentCommitFile,Commit.class);
          
-         return null;
+      
      
     }
 }
