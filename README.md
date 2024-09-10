@@ -66,5 +66,43 @@ In Gilet we support branching and have different history of commits derived from
 
      A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent. Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal
 
+     The staging area is cleared after a commit.
 
+     The commit command never adds, changes, or removes files in the working directory (other than those in the .gitlet directory). The rm command will remove such files, as well as staging them for removal, so that they will be untracked after a commit.
+
+     Any changes made to files after staging for addition or removal are ignored by the commit command, which only modifies the contents of the .gitlet directory. For example, if you remove a tracked file using the Unix rm command (rather than Gitlet’s command of the same name), it has no 
+     effect on the next commit, which will still contain the (now deleted) version of the file.
+
+     After the commit command, the new commit is added as a new node in the commit tree
+
+  ![image](https://github.com/user-attachments/assets/301bd84d-27aa-43e6-9636-3b9979b1a771)
+
+- ### <b> rm :</b>
+ 
+    Unstage the file if it is currently staged for addition. If the file is tracked in the current commit, Gitlet stage it for removal and remove the file from the working directory if the user has not already done.
+
+- ### <b> log :</b>
+
+    Starting at the current head commit, display information about each commit backwards along the commit tree until the initial commit , but only consider first parent in case more than one parent.
+
+  Example:
   
+  ![image](https://github.com/user-attachments/assets/be7bd817-28b1-481a-8429-e253c42dea86)
+
+  what the command do and get
+
+   ![image](https://github.com/user-attachments/assets/5652cb54-338e-4990-84aa-9d19e8cb68ef)
+
+- ### <b> global-log: </b>
+
+   Like log, except displays information about all commits ever made. The order of the commits does not matter
+
+- ### <b> find: </b>
+
+   Prints out the ids of all commits that have the given commit message, one per line. If there are multiple such commits, it prints the ids out on separate lines
+
+- ### <b> status: </b>
+
+   display some statistics
+
+  ![image](https://github.com/user-attachments/assets/56a2a698-c74a-468d-ae95-baf19469fec2)
