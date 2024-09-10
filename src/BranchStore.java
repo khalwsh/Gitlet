@@ -158,12 +158,7 @@ public class BranchStore {
       }
     }
 
-       public boolean CheckBranchExistence(String branchName)
-       {
-               File branchFile=Utils.join(Branches_Dir, branchName);
-               return branchFile.exists();
-               
-       }
+   
        public void createNewBranch(String branchName ,String commitHash)
        {
        

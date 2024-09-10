@@ -75,7 +75,7 @@ public class Repository {
         } catch (java.io.IOException ex) {
             Utils.exitWithMessage(ex.getMessage());
         }
-      
+       
         Commit commit = new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet
        
         // start with initial commit with message "initial commit" and timestamp=Unix epoch
@@ -231,63 +231,12 @@ public class Repository {
         }
 
     }
-   public void FastForwardMerge(String branchName,String remoteName)
-   {
   
-    Branch targetBranch;
-    if(remoteName!=null) targetBranch=remoteStore.getRemoteBranchFromLocal(remoteName, branchName);
-    else targetBranch=branchStore.getBranch(branchName);
-
-    if (remoteName==null && !branchStore.CheckBranchExistence(targetBranch.getName()))
-    {
-
-        Utils.exitWithMessage("No such branch exists.");
-    }
-    else {
-        String activeBranch = head.getHead();
-        if (remoteName==null && activeBranch.equals(branchName)) 
-        {
-           Utils.exitWithMessage("No need to checkout the current branch.");
-        }
-        
-        else {
-            //get list of all tracked files in both active and target branches
-            Map<String, String> trackedInActive = getCurrentCommit().trackedFiles();
-
-            String commitHashInTarget = targetBranch.getReferredCommitHash();
-            Commit targetCommit = commitStore.getCommit(commitHashInTarget);
-
-            Map<String, String> trackedInTarget = targetCommit.trackedFiles();
-            //check for tracked in target
-            for (Map.Entry<String, String> entry : trackedInTarget.entrySet()) {
-                String hashOfActive = trackedInActive.get(entry.getKey());
-                //tracked in target and not tracked in active
-                if (hashOfActive == null) {
-                    //two cases
-                    File existInCWD = workingArea.checkFileExistense(entry.getKey());
-                    if (existInCWD == null) {// create new one at CWD with content from target
-                        String blobContent = blobStore.getBlobContent(entry.getValue());
-                        workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
-                    }
-                    //can't take action since it is not tracked or removed
-                    else
-                        Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
-                }
-            }
-             ///must update fast forwarded branch pointer to point to same as the merged one head pointer still as it is
-             String targetHash=targetBranch.getReferredCommitHash();
-             Branch currentBranch=getCurrentBranch();
-             currentBranch.SetCommit(targetHash);
-             branchStore.saveBranch(currentBranch);
-        }
-    }
-   }
     public void CheckOutBranch(String branchName) {
         checkGitletExistense(); // check repo is initialized
         //check branch existence and not the same as the current one
         Branch targetBranch=branchStore.getBranch(branchName);
-
-        if ( !branchStore.CheckBranchExistence(targetBranch.getName()))
+        if ( targetBranch==null)
         {
     
             Utils.exitWithMessage("No such branch exists.");
@@ -361,8 +310,9 @@ public class Repository {
 
         if (branchName.equals(activeBranchName)) Utils.exitWithMessage("Cannot remove the current branch.");
         else {
-            boolean branchExist = branchStore.CheckBranchExistence(branchName);
-            if (branchExist == false) Utils.exitWithMessage("A branch with that name does not exist.");
+           
+            Branch targetBranch=branchStore.getBranch(branchName);
+            if (targetBranch==null) Utils.exitWithMessage("A branch with that name does not exist.");
             else {
                 //branch exist and not active one then remove it
                 branchStore.deleteBranch(branchName);
@@ -469,14 +419,15 @@ public class Repository {
             Utils.exitWithMessage("Cannot merge a branch with itself.");
         }
          
-        // if (workingArea.allFiles().stream().anyMatch(file -> !getCurrentCommit().trackedFiles().containsKey(file.getName()))) {
-        //     Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
-        // }
+     
 
         final Commit HEAD_COMMIT = commitStore.getCommit(currentBranch.getReferredCommitHash());
         final Commit OTHER_COMMIT = commitStore.getCommit(targetBranch.getReferredCommitHash());
         final Commit SPLIT_COMMIT = splitPoint(currentBranch, targetBranch);
 
+        if(SPLIT_COMMIT==null) {
+            Utils.exitWithMessage("There is No common LCA");
+        }
         if (SPLIT_COMMIT.equals(OTHER_COMMIT)) {
             Utils.exitWithMessage("Given branch is an ancestor of the current branch.");
         }
@@ -523,7 +474,7 @@ public class Repository {
                         otherContents +
                         ">>>>>>>\n";
                 workingArea.saveFile(contents, fileName);
-                stagingArea.stageForAddition(contents, fileName);
+                stagingArea.stageForAddition( fileName,contents);
                 isConflict.set(true);
             }
 
@@ -731,7 +682,57 @@ public class Repository {
         if (!remotePath.endsWith(".gitlet") || !remoteDir.isDirectory())
             Utils.exitWithMessage("Remote directory not found.");
     }
-
+    public void FastForwardMerge(String branchName,String remoteName)
+    {
+   
+     Branch targetBranch;
+     if(remoteName!=null) targetBranch=remoteStore.getRemoteBranchFromLocal(remoteName, branchName);
+     else targetBranch=branchStore.getBranch(branchName);
+ 
+     if (targetBranch==null)
+     {
+ 
+         Utils.exitWithMessage("No such branch exists.");
+     }
+     else {
+         String activeBranch = head.getHead();
+         if (remoteName==null && activeBranch.equals(branchName)) 
+         {
+            Utils.exitWithMessage("No need to checkout the current branch.");
+         }
+         
+         else {
+             //get list of all tracked files in both active and target branches
+             Map<String, String> trackedInActive = getCurrentCommit().trackedFiles();
+ 
+             String commitHashInTarget = targetBranch.getReferredCommitHash();
+             Commit targetCommit = commitStore.getCommit(commitHashInTarget);
+ 
+             Map<String, String> trackedInTarget = targetCommit.trackedFiles();
+             //check for tracked in target
+             for (Map.Entry<String, String> entry : trackedInTarget.entrySet()) {
+                 String hashOfActive = trackedInActive.get(entry.getKey());
+                 //tracked in target and not tracked in active
+                 if (hashOfActive == null) {
+                     //two cases
+                     File existInCWD = workingArea.checkFileExistense(entry.getKey());
+                     if (existInCWD == null) {// create new one at CWD with content from target
+                         String blobContent = blobStore.getBlobContent(entry.getValue());
+                         workingArea.addOrUpdateFileAtCWD(entry.getKey(), blobContent);
+                     }
+                     //can't take action since it is not tracked or removed
+                     else
+                         Utils.exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+                 }
+             }
+              ///must update fast forwarded branch pointer to point to same as the merged one head pointer still as it is
+              String targetHash=targetBranch.getReferredCommitHash();
+              Branch currentBranch=getCurrentBranch();
+              currentBranch.SetCommit(targetHash);
+              branchStore.saveBranch(currentBranch);
+         }
+     }
+    }
     private void FastForward(String remoteName, Branch remoteBranch) {
         String curCommitHash = getCurrentCommit().getCommitHash();
         remoteBranch.SetCommit(curCommitHash);
