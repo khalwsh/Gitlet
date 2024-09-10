@@ -158,4 +158,27 @@ In Gilet we support branching and have different history of commits derived from
     
     ![image](https://github.com/user-attachments/assets/abb557a0-ee6f-4bec-9374-3259c32ee507)
 
-    
+- ### <b> add-remote : </b>
+
+   Saves the given login information under the given remote name. Attempts to push or pull from the given remote name
+
+- ### <b> rm-remote : </b>
+
+   Remove information associated with the given remote name. The idea here is that if you ever wanted to change a remote that you added, you would have to first remove it and then re-add it.
+
+- ### <b> push : </b>
+   Attempts to append the current branch’s commits to the end of the given branch at the given remote. Details:
+
+   This command only works if the remote branch’s head is in the history of the current local head, which means that the local branch contains some commits in the future of the remote branch. In this case, append the future commits to the remote branch. Then, the remote should reset to the 
+   front of the appended commits (so its head will be the same as the local head). This is called fast-forwarding.
+
+   If the Gitlet system on the remote machine exists but does not have the input branch, then simply add the branch to the remote Gitlet.
+
+- ### <b> fetch : </b>
+
+   Brings down commits from the remote Gitlet repository into the local Gitlet repository. Basically, this copies all commits and blobs from the given branch in the remote repository (that are not already in the current repository) into a branch named [remote name]/[remote branch name] in the 
+   local .gitlet (just as in real Git), changing [remote name]/[remote branch name] to point to the head commit (thus copying the contents of the branch from the remote repository to the current one). This branch is created in the local repository if it did not previously exist.
+
+- ### <b> pull : </b>
+
+   Fetches branch [remote name]/[remote branch name] as for the fetch command, and then merges that fetch into the current branch.
