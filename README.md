@@ -41,4 +41,31 @@ In Gilet we support branching and have different history of commits derived from
 6- Supported commands are listed below.
 
 ## Gitlet functionality
-- init
+- ### <b>init</b> :
+  
+  Creates a new Gitlet version-control system in the current directory.
+
+  This system will automatically start with one commit: a commit that contains no files and has the commit message initial commit (just like that, with no punctuation).
+
+  It will have a single branch: master, which initially points to this initial commit, and master will be the current branch.
+
+  The timestamp for this initial commit will be 00:00:00 UTC, Thursday, 1 January 1970 , Since the initial commit in all repositories created by Gitlet will have exactly the same content, it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.
+
+
+- ### <b>add </b>:
+
+    Adds a copy of the file as it currently exists to the staging area.
+
+    If the current working version of the file is identical to the version in the current commit, gitlet will not stage it to be added.
+
+- ### <b> commit :</b>
+     Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
+
+     The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files; it will keep versions of files exactly as they are, and not update them.
+
+     A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit, in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
+
+     A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent. Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal
+
+
+  
