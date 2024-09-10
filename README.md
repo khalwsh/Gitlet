@@ -39,3 +39,6 @@ In Gilet we support branching and have different history of commits derived from
 5- Run the program by typing java Main [THE COMMANDS GO HERE WITHOUT THE SQUARE BRACKETS EACH ARGUMENT SHOULD BE SEPARTED BY A SPACE OR CAPSULATE THE DESIRED ARGUMENT IN DOUBLE QUOTES]
 
 6- Supported commands are listed below.
+
+## Gitlet functionality
+- init
