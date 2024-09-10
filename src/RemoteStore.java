@@ -49,10 +49,10 @@ public class RemoteStore {
        String remotePath=getRemotePath(remoteName);
        if(remotePath ==null) Utils.exitWithMessage("Remote file is not exist");
 
-     File remotBranchFile=Utils.join(remotePath,"branches",remoteBranchName);
-     if(!remotBranchFile.exists()) return null;
+     File remoteBranchFile=Utils.join(remotePath,"branches",remoteBranchName);
+     if(!remoteBranchFile.exists()) return null;
   
-        Branch remoteBranch=Utils.readObject(remotBranchFile, Branch.class);
+        Branch remoteBranch=Utils.readObject(remoteBranchFile, Branch.class);
         return remoteBranch;
           
     }

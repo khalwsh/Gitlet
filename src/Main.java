@@ -6,7 +6,7 @@ public class Main {
         if (args.length == 0) {
             Utils.exitWithMessage("Please Enter command.");
         }
-        String command = args[0];
+        String command =args[0];
 
         Repository repository = new Repository(System.getProperty("user.dir"));
 
@@ -106,8 +106,8 @@ public class Main {
                 repository.fetch(args[1],args[2]);
                 break;
             case "pull":
-                //ValidateArgs(2, args.length-1);
-                repository.pull("origin","master");
+                ValidateArgs(2, args.length-1);
+                repository.pull(args[1],args[2]);
             default:
                 break;
         }
