@@ -106,3 +106,56 @@ In Gilet we support branching and have different history of commits derived from
    display some statistics
 
   ![image](https://github.com/user-attachments/assets/56a2a698-c74a-468d-ae95-baf19469fec2)
+
+- ### <b> checkout : </b>
+
+    Takes the version of the file as it exists in the head commit and puts it in the working directory, overwriting the version of the file that’s already there if there is one. The new version of the file is not staged.
+
+    Takes the version of the file as it exists in the commit with the given id, and puts it in the working directory, overwriting the version of the file that’s already there if there is one. The new version of the file is not staged.
+
+    Takes all files in the commit at the head of the given branch, and puts them in the working directory, overwriting the versions of the files that are already there if they exist. Also, at the end of this command, the given branch will now be considered the current branch (HEAD). Any files 
+    that are tracked in the current branch but are not present in the checked-out branch are deleted. The staging area is cleared, unless the checked-out branch is the current branch
+
+- ### <b> branch : </b>
+     Creates a new branch with the given name, and points it at the current head commit. A branch is nothing more than a name for a reference (a SHA-1 identifier) to a commit node. This command does NOT immediately switch to the newly created branch (just as in real Git). Before you ever call 
+     branch, your code should be running with a default branch called “master”.
+
+    ![image](https://github.com/user-attachments/assets/273e3724-5738-400d-958b-7ddbd0f40fa4)
+
+    ![image](https://github.com/user-attachments/assets/04aa6ee8-9341-42b6-83c4-8c597d8374cb)
+
+- ### <b> rm-branch :</b>
+
+    Deletes the branch with the given name. This only means to delete the pointer associated with the branch; it does not mean to delete all commits that were created under the branch, or anything like that.
+
+- ### <b> reset : </b>
+
+    checks out all the files tracked by the given commit. Removes tracked files that are not present in that commit. Also moves the current branch’s head to that commit node. See the intro for an example of what happens to the head pointer after using reset. The [commit id] may be abbreviated 
+    as for checkout. The staging area is cleared. The command is essentially checkout of an arbitrary commit that also changes the current branch head.
+
+- ### <b> merge : </b>
+
+    Merges files from the given branch into the current branch
+    Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch (checked out from the commit at the front of the given branch). These files should then all be 
+    automatically staged. To clarify, if a file is “modified in the given branch since the split point” this means the version of the file as it exists in the commit at the front of the given branch has different content from the version of the file at the split point. Remember: blobs are 
+    content addressable!
+
+    Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are.
+
+    Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge. If a file was removed from both the current and given branch, but a file of the same name is present in 
+    the working directory, it is left alone and continues to be absent (not tracked nor staged) in the merge.
+
+    Any files that were not present at the split point and are present only in the current branch should remain as they are.
+
+    Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
+
+    Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked). 
+
+    Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.
+
+    Any files modified in different ways in the current and given branches are in conflict. “Modified in different ways” can mean that the contents of both are changed and different from other, or the contents of one are changed and the other file is deleted, or the file was absent at the 
+    split point and has different contents in the given and current branches. In this case, replace the contents of the conflicted file with
+    
+    ![image](https://github.com/user-attachments/assets/abb557a0-ee6f-4bec-9374-3259c32ee507)
+
+    
