@@ -76,13 +76,8 @@ public class Repository {
             Utils.exitWithMessage(ex.getMessage());
         }
        
-         File f=new File("file.txt");
-         String hash=Utils.sha1(Utils.readContentsAsString(f));
-          File blob=Utils.join(Blobs_Dir, hash);
-          Utils.writeContents(blob, Utils.readContentsAsString(f));
-           Map<String,String>tracked=new TreeMap();
-           tracked.put("file.txt", hash);
-        Commit commit = new Commit(new Date(0), "Initial Commit",tracked);   //Initialize the directory structure inside .gitlet
+        
+        Commit commit = new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet
        
         // start with initial commit with message "initial commit" and timestamp=Unix epoch
         commitStore.saveCommit(commit);
