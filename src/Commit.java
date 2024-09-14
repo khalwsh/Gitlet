@@ -19,10 +19,9 @@ public class Commit  implements Serializable {
         this.currentHash = generateHash();
     }
 
-    public Commit(Date timeStamp, String message,Map<String, String> trackedFiles) {
+    public Commit(Date timeStamp, String message) {
         this.timeStamp = timeStamp;
         this.message = message;
-        this.trackedFiles=trackedFiles;
         this.currentHash = generateHash();
     }
 
