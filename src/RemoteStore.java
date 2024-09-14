@@ -1,6 +1,8 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RemoteStore {
     private final File Remote_Dir;
@@ -8,7 +10,22 @@ public class RemoteStore {
     public RemoteStore(File Remote_Dir) {
         this.Remote_Dir = Remote_Dir;
     }
+public Set<String> GetRemoteCommitHashes(String remoteName) {
 
+    String remotePath=getRemotePath(remoteName);
+    if(remotePath ==null) Utils.exitWithMessage("Remote file is not exist");
+
+  File remoteCommitFile=Utils.join(remotePath,"commits");
+  if(!remoteCommitFile.exists()) return null;
+
+        File[] filesList = remoteCommitFile.listFiles();
+          Set<String> set = new HashSet<>();
+        for (File file : filesList) {
+            set.add(file.getName());
+        }
+        return set;
+    
+    }
     //just create new file with remote name and path to it
    public void addRemotePath(String remoteName, String remotePath) {
     // Create the directory for the remote

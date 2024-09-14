@@ -1,6 +1,8 @@
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 public class CommitStore {
     private final File Commits_Dir;
 
@@ -8,11 +10,16 @@ public class CommitStore {
         this.Commits_Dir = Commits_Dir;
     }
 
-    public File[] GetCommitFiles() {
+    public Set<String> GetCommitHashes() {
         File[] filesList = Commits_Dir.listFiles();
-        return filesList;
+          Set<String> set = new HashSet<>();
+        for (File file : filesList) {
+            set.add(file.getName());
+        }
+        return set;
+    
     }
-
+   
     public void saveCommit(Commit commit) {
         File currentCommitFile = Utils.join(Commits_Dir, commit.getCommitHash());
         Utils.writeObject(currentCommitFile, commit);
@@ -32,7 +39,8 @@ public class CommitStore {
 
     public ArrayList<Commit> getAllCommitsHistory() {
         ArrayList<Commit> listOfCommits = new ArrayList<>();
-        for (File f : GetCommitFiles()) {
+        File[] filesList = Commits_Dir.listFiles();
+        for (File f : filesList) {
             listOfCommits.add(Utils.readObject(f, Commit.class));
         }
         return listOfCommits;
