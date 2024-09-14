@@ -34,7 +34,10 @@ public class Main {
                 ValidateArgs(0, args.length - 1);
                 repository.log();
                 break;
-
+            case "log-all":
+                  ValidateArgs(0, args.length-1);
+                  repository.logAll();
+                  break;
             case "global-log":
                 ValidateArgs(0, args.length - 1);
                 repository.globallog();
@@ -108,6 +111,7 @@ public class Main {
             case "pull":
                 ValidateArgs(2, args.length-1);
                 repository.pull(args[1],args[2]);
+           
             default:
                 break;
         }

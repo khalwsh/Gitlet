@@ -76,7 +76,13 @@ public class Repository {
             Utils.exitWithMessage(ex.getMessage());
         }
        
-        Commit commit = new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet
+         File f=new File("file.txt");
+         String hash=Utils.sha1(Utils.readContentsAsString(f));
+          File blob=Utils.join(Blobs_Dir, hash);
+          Utils.writeContents(blob, Utils.readContentsAsString(f));
+           Map<String,String>tracked=new TreeMap();
+           tracked.put("file.txt", hash);
+        Commit commit = new Commit(new Date(0), "Initial Commit",tracked);   //Initialize the directory structure inside .gitlet
        
         // start with initial commit with message "initial commit" and timestamp=Unix epoch
         commitStore.saveCommit(commit);
@@ -145,6 +151,15 @@ public class Repository {
             System.out.println(listOfCommits.get(i));
         }
 
+    }
+    public void logAll()
+    {
+        List<Commit>commits=getCommitTree(getCurrentCommit(), null);
+         System.out.println(commits.size());
+        for (int i = 0; i < commits.size(); i++) {
+            System.out.println("===");
+            System.out.println(commits.get(i));
+        }
     }
 
     public void globallog() {
@@ -423,7 +438,7 @@ public class Repository {
 
         final Commit HEAD_COMMIT = commitStore.getCommit(currentBranch.getReferredCommitHash());
         final Commit OTHER_COMMIT = commitStore.getCommit(targetBranch.getReferredCommitHash());
-        final Commit SPLIT_COMMIT = splitPoint(currentBranch, targetBranch);
+        final Commit SPLIT_COMMIT = splitPoint(currentBranch, targetBranch,null);
 
         if(SPLIT_COMMIT==null) {
             Utils.exitWithMessage("There is No common LCA");
@@ -456,6 +471,7 @@ public class Repository {
                 // file in split commit and in the Other branch and the file changed but didn't change in the current branch
                 String contents = blobStore.getBlobContent(OTHER);
                 workingArea.saveFile(contents, fileName);
+               
                 stagingArea.stageForAddition(blobStore.getBlobContent(OTHER), fileName);
             }
 
@@ -469,12 +485,15 @@ public class Repository {
                 String headContents = (HEAD != null ? blobStore.getBlobContent(HEAD) : "");
                 String otherContents = (OTHER != null ? blobStore.getBlobContent(OTHER) : "");
                 String contents = "<<<<<<< HEAD\n" +
-                        headContents +
-                        "=======\n" +
-                        otherContents +
-                        ">>>>>>>\n";
+                headContents +
+                "\n=======\n" +
+                otherContents +
+                "\n>>>>>>>\n";
                 workingArea.saveFile(contents, fileName);
-                stagingArea.stageForAddition( fileName,contents);
+               
+                blobStore.saveBlob( workingArea.getFile(fileName));
+               
+                stagingArea.stageForAddition( fileName,Utils.sha1(contents));
                 isConflict.set(true);
             }
 
@@ -548,15 +567,38 @@ public class Repository {
         String remotePath = remoteStore.getRemotePath(remoteName);
         if (remotePath == null) Utils.exitWithMessage("Remote file is not exist");
         checkRemoteGitletExistenseAndPathValidity(remotePath);
-        ///get remote  branch into memory
+
         Branch remoteBranch = remoteStore.getRemoteBranch(remoteName, remoteBranchName);
-        ///check if remote head is an ancestor of local branch history
-        ///if yes then push to remote
-        /// otherwise you must pull before push
-        Map.Entry<Boolean, ArrayList<Commit>>
-                checkAncestor = branchStore.checkIsAncestor(remoteName, remoteBranch, getCurrentCommit(), commitStore, remoteStore);
-        if (!checkAncestor.getKey()) Utils.exitWithMessage("Please pull down remote changes before pushing.");
-        else {//copy commits and blobs from local to remote
+        Branch curBranch =getCurrentBranch();
+
+           final Commit HEAD_COMMIT = commitStore.getCommit(curBranch.getReferredCommitHash());
+
+        final Commit OTHER_COMMIT = remoteStore.getRemoteCommit(remoteBranch.getReferredCommitHash(),remoteName);
+
+        final Commit SPLIT_COMMIT = splitPoint(curBranch, remoteBranch,remoteName); 
+            
+        ///4 cases
+        if(SPLIT_COMMIT==null) {
+            Utils.exitWithMessage("There is No common LCA");
+        }
+        if(SPLIT_COMMIT.equals(HEAD_COMMIT) &&!HEAD_COMMIT.equals(OTHER_COMMIT)) Utils.exitWithMessage("local branch is behind remote branch you must pull before push");
+        else if(HEAD_COMMIT.equals(SPLIT_COMMIT)&& SPLIT_COMMIT.equals(OTHER_COMMIT)&& OTHER_COMMIT.equals(HEAD_COMMIT)) Utils.exitWithMessage("Already up to date");
+        else 
+        {
+            //divergent 2 cases 
+            // check if local pulled from remote => valid push
+            //otherwise => you must pull before push
+            Set<String>localCommits=commitStore.GetCommitHashes();
+            Set<String>remoteCommits=remoteStore.GetRemoteCommitHashes(remoteName);
+            for (String hash : remoteCommits) {
+                if(!localCommits.contains(hash)) Utils.exitWithMessage("Please pull down remote changes before pushing.");
+            
+            }
+            ArrayList<Commit>copies=new ArrayList<>();
+            for(String hash :localCommits)
+            {
+                if(!remoteCommits.contains(hash)) copies.add(commitStore.getCommit(hash));
+            }
             String gitletPath = System.getProperty("user.dir");
             Path localCommitsPath = Paths.get(gitletPath, ".gitlet", "commits");
             Path localBlobsPath = Paths.get(gitletPath, ".gitlet", "blobs");
@@ -565,11 +607,14 @@ public class Repository {
             Path remoteBlobsPath = Paths.get(remotePath, "blobs");
 
             branchStore.CopyFromSrcToDist
-                    (localCommitsPath.toString(), localBlobsPath.toString(), remoteCommitsPath.toString(), remoteBlobsPath.toString(), checkAncestor.getValue());
+                    (localCommitsPath.toString(), localBlobsPath.toString(), remoteCommitsPath.toString(), remoteBlobsPath.toString(), copies);
 
-            //now set remote head to current commit
+            //synchronize remote head pointer to current commit
             FastForward(remoteName, remoteBranch);
         }
+       
+        
+        
     }
 
     void fetch(String remoteName, String remoteBranchName) {
@@ -618,11 +663,17 @@ public class Repository {
          merge(branchName, remoteName);
  }
 
-    private Commit splitPoint(Branch a, Branch b) {
+    private Commit splitPoint(Branch a, Branch b,String remoteName) {
         Commit A = commitStore.getCommit(a.getReferredCommitHash());
-        Commit B = commitStore.getCommit(b.getReferredCommitHash());
-        Set<String> seta = getCommitTree(A).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
-        Set<String> setb = getCommitTree(B).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
+        Commit B;
+        if(remoteName!=null)
+        {
+           B=remoteStore.getRemoteCommit(b.getReferredCommitHash(), remoteName);
+        }
+        else   B = commitStore.getCommit(b.getReferredCommitHash());
+      
+        Set<String> seta = getCommitTree(A,null).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
+        Set<String> setb = getCommitTree(B,remoteName).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
         Date LcaDate = new Date(0);
         Commit Point = null;
         for (String sa : seta) {
@@ -637,13 +688,13 @@ public class Repository {
         return Point;
     }
 
-    private List<Commit> getCommitTree(Commit rootCommit) {
+    private List<Commit> getCommitTree(Commit rootCommit,String remoteName) {
         List<Commit> result = new ArrayList<>();
-        DFS(rootCommit, new HashSet<>(), result);
+        DFS(rootCommit, new HashSet<>(), result,remoteName);
         return result;
     }
 
-    private void DFS(Commit node, Set<String> visited, List<Commit> list) {
+    private void DFS(Commit node, Set<String> visited, List<Commit> list,String remoteName) {
         list.add(node);
         visited.add(node.getCommitHash());
 
@@ -651,11 +702,13 @@ public class Repository {
         String secondaryParent = node.getSecondryParent();
 
         if (primaryParent != null && !visited.contains(primaryParent)) {
-            DFS(commitStore.getCommit(primaryParent), visited, list);
+            if(remoteName==null) DFS(commitStore.getCommit(primaryParent), visited, list,null);
+            else  DFS(remoteStore.getRemoteCommit(primaryParent,remoteName), visited, list,remoteName);
         }
 
         if (secondaryParent != null && !visited.contains(secondaryParent)) {
-            DFS(commitStore.getCommit(secondaryParent), visited, list);
+            if(remoteName==null) DFS(commitStore.getCommit(secondaryParent), visited, list,null);
+            else DFS(remoteStore.getRemoteCommit(secondaryParent,remoteName), visited, list,remoteName);
         }
     }
 
@@ -756,7 +809,16 @@ public class Repository {
         // Checkout files from the target commit
         targetCommit.trackedFiles().keySet().forEach(fileName -> CheckOutFileByHash(targetCommit.getCommitHash() , fileName));
     }
-  
+   public void test(String first,String second)
+   {
+    String contents = "<<<<<<< HEAD\n" +
+                first +
+                "\n=======\n" +
+                second +
+                "\n>>>>>>>\n";
+           File f=new File("test.txt");
+           Utils.writeContents(f,contents);     
+   }
    
 }
 
