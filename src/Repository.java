@@ -76,7 +76,7 @@ public class Repository {
             Utils.exitWithMessage(ex.getMessage());
         }
        
-        
+       
         Commit commit = new Commit(new Date(0), "Initial Commit");   //Initialize the directory structure inside .gitlet
        
         // start with initial commit with message "initial commit" and timestamp=Unix epoch
@@ -804,16 +804,7 @@ public class Repository {
         // Checkout files from the target commit
         targetCommit.trackedFiles().keySet().forEach(fileName -> CheckOutFileByHash(targetCommit.getCommitHash() , fileName));
     }
-   public void test(String first,String second)
-   {
-    String contents = "<<<<<<< HEAD\n" +
-                first +
-                "\n=======\n" +
-                second +
-                "\n>>>>>>>\n";
-           File f=new File("test.txt");
-           Utils.writeContents(f,contents);     
-   }
+   
    
 }
 
