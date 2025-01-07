@@ -95,7 +95,10 @@ public class Main {
                 ValidateArgs(1, args.length - 1);
                 repository.rebase(args[1]);
                 break;
-           
+            case "deleteRepo":
+                ValidateArgs(0, args.length - 1);
+                repository.deleteRepo();
+
             default:
                 break;
         }
