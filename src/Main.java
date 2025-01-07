@@ -91,26 +91,10 @@ public class Main {
                 ValidateArgs(1, args.length - 1);
                 repository.reset(args[1]);
                 break;
-            case "add-remote":
-
-                ValidateArgs(2, args.length - 1);
-                repository.addRemote(args[1], args[2]);
-                break;
-            case "rm-remote":
+            case "rebase":
                 ValidateArgs(1, args.length - 1);
-                repository.removeRemote(args[1]);
+                repository.rebase(args[1]);
                 break;
-            case "push":
-                ValidateArgs(2, args.length - 1);
-                repository.push(args[1], args[2]);
-                break;
-            case "fetch":
-                ValidateArgs(2, args.length - 1);
-                repository.fetch(args[1],args[2]);
-                break;
-            case "pull":
-                ValidateArgs(2, args.length-1);
-                repository.pull(args[1],args[2]);
            
             default:
                 break;
