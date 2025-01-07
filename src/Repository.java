@@ -812,6 +812,7 @@ public class Repository {
         String confirmation = scanner.nextLine().trim();
 
         if (!confirmation.equals("YES")) {
+            scanner.close();
             System.out.println("Repository deletion cancelled.");
             return;
         }
@@ -821,7 +822,7 @@ public class Repository {
         System.out.print("Enter the full path to proceed with deletion: ");
 
         String pathConfirmation = scanner.nextLine().trim();
-
+        scanner.close();
         if (!pathConfirmation.equals(CWD.getAbsolutePath())) {
             System.out.println("Path mismatch. Repository deletion cancelled.");
             return;
