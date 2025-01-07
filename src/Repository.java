@@ -704,6 +704,7 @@ public class Repository {
          fetch(remoteName, branchName);
          merge(branchName, remoteName);
  }
+ ////////////////////////////////////////
     public void deleteRepo() {
         // validate Gitlet repository existence
         checkGitletExistense();
@@ -962,6 +963,11 @@ public class Repository {
             Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
         }
     }
+    private void checkRemoteGitletExistenseAndPathValidity(String remotePath) {
+        File remoteDir = new File(remotePath);
+        if (!remotePath.endsWith(".gitlet") || !remoteDir.isDirectory())
+            Utils.exitWithMessage("Remote directory not found.");
+    }
 
     //get active branch
     private Branch getCurrentBranch() {
@@ -1007,209 +1013,7 @@ public class Repository {
            File f=new File("test.txt");
            Utils.writeContents(f,contents);     
    }
-    public void rebase(String branchName) {
-        // Check Gitlet repository existence
-        checkGitletExistense();
-
-        // Get current branch and target branch
-        Branch currentBranch = getCurrentBranch();
-        Branch targetBranch = branchStore.getBranch(branchName);
-
-        if (targetBranch == null) {
-            Utils.exitWithMessage("A branch with that name does not exist.");
-        }
-
-        // Get commits for current and target branches
-        Commit currentCommit = getCurrentCommit();
-        Commit targetCommit = commitStore.getCommit(targetBranch.getReferredCommitHash());
-
-        // Find the split point
-        Commit splitCommit = splitPoint(currentBranch, targetBranch, null);
-
-        if (splitCommit == null) {
-            Utils.exitWithMessage("No common ancestor found.");
-        }
-
-        // Fast-forward case: if current branch is ancestor of target branch
-        if (splitCommit.equals(currentCommit)) {
-            CheckOutBranch(branchName);
-            return;
-        }
-
-        // Check if target branch is ancestor of current branch
-        List<Commit> currentCommitHistory = getCommitTree(currentCommit, null);
-        if (currentCommitHistory.contains(targetCommit)) {
-            Utils.exitWithMessage("Already up-to-date");
-        }
-
-        // Collect commits to replay
-        List<Commit> commitsToReplay = new ArrayList<>();
-        Commit temp = targetCommit;
-        while (!temp.getCommitHash().equals(splitCommit.getCommitHash())) {
-            commitsToReplay.add(0, temp);  // Add at the beginning to maintain order
-            temp = commitStore.getCommit(temp.getParentCommitHash());
-        }
-
-        // Temporarily checkout target branch
-        String originalBranchName = head.getHead();
-        head.setHead(branchName);
-
-        // Replay commits
-        Commit newParent = targetCommit;
-        for (Commit commitToReplay : commitsToReplay) {
-            // Prepare for merge conflict detection
-            Map<String, String> newTrackedFiles = new TreeMap<>(targetCommit.trackedFiles());
-
-            // Handle conflicts and file changes
-            for (Map.Entry<String, String> entry : commitToReplay.trackedFiles().entrySet()) {
-                String fileName = entry.getKey();
-                String commitFileHash = entry.getValue();
-                String splitFileHash = splitCommit.trackedFiles().get(fileName);
-                String targetFileHash = targetCommit.trackedFiles().get(fileName);
-
-                // Conflict detection logic
-                if (!Objects.equals(splitFileHash, commitFileHash) && !Objects.equals(splitFileHash, targetFileHash)) {
-                    // Conflict
-                    String headContents = blobStore.getBlobContent(commitFileHash);
-                    String otherContents = blobStore.getBlobContent(targetFileHash);
-                    String contents = "<<<<<<< HEAD\n" +
-                            headContents +
-                            "\n=======\n" +
-                            otherContents +
-                            "\n>>>>>>>\n";
-
-                    workingArea.saveFile(contents, fileName);
-                    blobStore.saveBlob(workingArea.getFile(fileName));
-                    stagingArea.stageForAddition(fileName, Utils.sha1(contents));
-
-                    // Modify tracked files to include conflict file
-                    newTrackedFiles.put(fileName, Utils.sha1(contents));
-                } else {
-                    // No conflict, add file
-                    newTrackedFiles.put(fileName, commitFileHash);
-                }
-//                System.out.println(commitFileHash + " " + fileName);
-                workingArea.saveFile(blobStore.getBlobContent(commitFileHash) , fileName);
-            }
-
-            // Create new commit
-            String commitMessage = commitToReplay.CommitMessage() + " (rebase)";
-            Commit newCommit = new Commit(
-                    new Date(),
-                    commitMessage,
-                    null,
-                    newParent.getCommitHash(),
-                    newTrackedFiles
-            );
-
-            commitStore.saveCommit(newCommit);
-            newParent = newCommit;
-        }
-
-        // Update current branch to point to the last replayed commit
-        currentBranch.SetCommit(newParent.getCommitHash());
-        branchStore.saveBranch(currentBranch);
-
-        // Restore original head
-        head.setHead(originalBranchName);
-
-        // Clear staging area
-        stagingArea.clear();
-        
-    }
-
-    public void deleteRepo() {
-        // validate Gitlet repository existence
-        checkGitletExistense();
-
-        // create a safety confirmation mechanism
-        System.out.println("WARNING: You are about to permanently delete the entire Gitlet repository.");
-        System.out.println("This action cannot be undone and will remove ALL version history, branches, and staged files.");
-        System.out.print("Are you sure you want to proceed? (Type 'YES' to confirm): ");
-
-        // Use scanner to get user input
-        java.util.Scanner scanner = new java.util.Scanner(System.in);
-        String confirmation = scanner.nextLine().trim();
-
-        if (!confirmation.equals("YES")) {
-            scanner.close();
-            System.out.println("Repository deletion cancelled.");
-            return;
-        }
-
-        // additional confirmation with repository path
-        System.out.printf("Please confirm the repository path: %s\n", CWD.getAbsolutePath());
-        System.out.print("Enter the full path to proceed with deletion: ");
-
-        String pathConfirmation = scanner.nextLine().trim();
-        scanner.close();
-        if (!pathConfirmation.equals(CWD.getAbsolutePath())) {
-            System.out.println("Path mismatch. Repository deletion cancelled.");
-            return;
-        }
-
-        // perform a comprehensive cleanup of Gitlet directories
-        File[] subdirectories = {
-                Gitlet_Dir,
-                Branches_Dir,
-                Blobs_Dir,
-                Commits_Dir,
-                Staged_Dir,
-                Addition_Dir,
-                Removal_Dir,
-                Remote_Dir
-        };
-
-        final int[] deletedFiles = {0};
-        final int[] deletedDirectories = {0};
-
-        // recursive deletion helper method
-        java.util.function.Consumer<File> recursiveDelete = new java.util.function.Consumer<File>() {
-            public void accept(File file) {
-                if (file.isDirectory()) {
-                    File[] contents = file.listFiles();
-                    if (contents != null) {
-                        for (File f : contents) {
-                            accept(f);
-                        }
-                    }
-                    if (file.delete()) {
-                        deletedDirectories[0]++;
-                    }
-                } else if (file.isFile()) {
-                    if (file.delete()) {
-                        deletedFiles[0]++;
-                    }
-                }
-            }
-        };
-
-        // delete Gitlet repository contents
-        for (File dir : subdirectories) {
-            if (dir.exists()) {
-                recursiveDelete.accept(dir);
-            }
-        }
-
-        // delete head file separately
-        if (Head_file.exists()) {
-            Head_file.delete();
-        }
-
-        boolean fullyDeleted = Gitlet_Dir.exists() == false;
-
-        // provide detailed deletion report
-        if (fullyDeleted) {
-            System.out.println("Gitlet Repository Successfully Deleted:");
-            System.out.printf("Total Files Deleted: %d\n", deletedFiles[0]);
-            System.out.printf("Total Directories Deleted: %d\n", deletedDirectories[0]);
-            System.out.println("All version control data has been permanently removed.");
-        } else {
-            System.err.println("WARNING: Complete repository deletion was not successful.");
-            System.err.println("Some files or directories might remain. Manual cleanup might be required.");
-        }
-
-    }
+    
 
 }
 
