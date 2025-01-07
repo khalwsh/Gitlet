@@ -588,7 +588,6 @@ public class Repository {
         currentBranch.SetCommit(targetCommit.getCommitHash());
         branchStore.saveBranch(currentBranch);
     }
-<<<<<<< HEAD
     public void addRemote(String remoteName, String remotePath) {
         //check if local and remote .gitlet folder exist
         checkGitletExistense();
@@ -909,8 +908,6 @@ public class Repository {
 
     }
 
-=======
->>>>>>> 8d3201864a55d709c9427d3c9a5b616216193f51
 
     private Commit splitPoint(Branch a, Branch b,String remoteName) {
         Commit A = commitStore.getCommit(a.getReferredCommitHash());
