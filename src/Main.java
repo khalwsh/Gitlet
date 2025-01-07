@@ -111,7 +111,14 @@ public class Main {
             case "pull":
                 ValidateArgs(2, args.length-1);
                 repository.pull(args[1],args[2]);
-           
+
+            case "rebase":
+                ValidateArgs(1, args.length - 1);
+                repository.rebase(args[1]);
+                break;
+            case "deleteRepo":
+                ValidateArgs(0, args.length - 1);
+                repository.deleteRepo();
             default:
                 break;
         }
