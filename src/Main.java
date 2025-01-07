@@ -91,15 +91,11 @@ public class Main {
                 ValidateArgs(1, args.length - 1);
                 repository.reset(args[1]);
                 break;
-            case "add-remote":
-
-                ValidateArgs(2, args.length - 1);
-                repository.addRemote(args[1], args[2]);
-                break;
-            case "rm-remote":
+            case "rebase":
                 ValidateArgs(1, args.length - 1);
-                repository.removeRemote(args[1]);
+                repository.rebase(args[1]);
                 break;
+<<<<<<< HEAD
             case "push":
                 ValidateArgs(2, args.length - 1);
                 repository.push(args[1], args[2]);
@@ -119,6 +115,12 @@ public class Main {
             case "deleteRepo":
                 ValidateArgs(0, args.length - 1);
                 repository.deleteRepo();
+=======
+            case "deleteRepo":
+                ValidateArgs(0, args.length - 1);
+                repository.deleteRepo();
+
+>>>>>>> 8d3201864a55d709c9427d3c9a5b616216193f51
             default:
                 break;
         }

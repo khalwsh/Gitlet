@@ -14,30 +14,27 @@ A version-control system is essentially a backup system for related collections 
 
 In Gitlet, you don’t just commit individual files at a time. Instead, you can commit a coherent set of files at the same time. We like to think of each commit as a snapshot of your entire project at one point in time.
 Maintaing a commit history of all versions of the project
-      <p align="center">       ![image](https://github.com/user-attachments/assets/d7d364c7-41ab-42ac-a4b3-49f0e7920a7d) </p>
-
+      
 In Gilet we support branching and have different history of commits derived from the same commit , also we support merging them in one new commit.
-      <p align="center">       ![image](https://github.com/user-attachments/assets/eb11b532-fd33-48a7-a2a4-3b3417be10a0)
- </p>
+   
  
 ## Dependencies
 
 1 - Install Java : https://www.java.com/en/download/
-
+2 - Install this library: https://github.com/Berkeley-CS61B/library-sp21
+3 - put the library in src folder
 
 ## How To Run
 
-1- Download the repo and unzip it.
+1- Download the project and unzip it.
 
-2- Open gitlet-master then open gitlet folder.
+2- Open git bash and navigate to the path in step 3, use (cd ..) to go one directory to the back, (cd folder_name) to enter the specified folder and use (pwd) to know where you currently are. (NOTE:use the previous commands without the braces)
 
-3- Open git bash and navigate to the path in step 3, use (cd ..) to go one directory to the back, (cd folder_name) to enter the specified folder and use (pwd) to know where you currently are. (NOTE:use the previous commands without the braces)
+3- Compile the program by typing javac *.java
 
-4- Compile the program by typing javac *.java
+4- Run the program by typing java Main [THE COMMANDS GO HERE WITHOUT THE SQUARE BRACKETS EACH ARGUMENT SHOULD BE SEPARTED BY A SPACE OR CAPSULATE THE DESIRED ARGUMENT IN DOUBLE QUOTES]
 
-5- Run the program by typing java Main [THE COMMANDS GO HERE WITHOUT THE SQUARE BRACKETS EACH ARGUMENT SHOULD BE SEPARTED BY A SPACE OR CAPSULATE THE DESIRED ARGUMENT IN DOUBLE QUOTES]
-
-6- Supported commands are listed below.
+5- Supported commands are listed below.
 
 ## Gitlet functionality
 - ### <b>init</b> :
@@ -75,8 +72,6 @@ In Gilet we support branching and have different history of commits derived from
 
      After the commit command, the new commit is added as a new node in the commit tree
 
-  ![image](https://github.com/user-attachments/assets/301bd84d-27aa-43e6-9636-3b9979b1a771)
-
 - ### <b> rm :</b>
  
     Unstage the file if it is currently staged for addition. If the file is tracked in the current commit, Gitlet stage it for removal and remove the file from the working directory if the user has not already done.
@@ -87,11 +82,8 @@ In Gilet we support branching and have different history of commits derived from
 
   Example:
   
-  ![image](https://github.com/user-attachments/assets/be7bd817-28b1-481a-8429-e253c42dea86)
-
   what the command do and get
 
-   ![image](https://github.com/user-attachments/assets/5652cb54-338e-4990-84aa-9d19e8cb68ef)
 
 - ### <b> global-log: </b>
 
@@ -105,7 +97,6 @@ In Gilet we support branching and have different history of commits derived from
 
    display some statistics
 
-  ![image](https://github.com/user-attachments/assets/56a2a698-c74a-468d-ae95-baf19469fec2)
 
 - ### <b> checkout : </b>
 
@@ -120,9 +111,7 @@ In Gilet we support branching and have different history of commits derived from
      Creates a new branch with the given name, and points it at the current head commit. A branch is nothing more than a name for a reference (a SHA-1 identifier) to a commit node. This command does NOT immediately switch to the newly created branch (just as in real Git). Before you ever call 
      branch, your code should be running with a default branch called “master”.
 
-    ![image](https://github.com/user-attachments/assets/273e3724-5738-400d-958b-7ddbd0f40fa4)
 
-    ![image](https://github.com/user-attachments/assets/04aa6ee8-9341-42b6-83c4-8c597d8374cb)
 
 - ### <b> rm-branch :</b>
 
@@ -156,7 +145,6 @@ In Gilet we support branching and have different history of commits derived from
     Any files modified in different ways in the current and given branches are in conflict. “Modified in different ways” can mean that the contents of both are changed and different from other, or the contents of one are changed and the other file is deleted, or the file was absent at the 
     split point and has different contents in the given and current branches. In this case, replace the contents of the conflicted file with
     
-    ![image](https://github.com/user-attachments/assets/abb557a0-ee6f-4bec-9374-3259c32ee507)
 
 - ### <b> add-remote : </b>
 
