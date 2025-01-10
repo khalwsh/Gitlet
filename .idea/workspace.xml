@@ -5,26 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dcc5e801-05e1-456c-b8f0-4d61678b6f14" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/Utilities.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BlobStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BlobStore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BranchStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BranchStore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Commit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Commit.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/CommitStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/CommitStore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/RemoteStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/RemoteStore.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Repository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Repository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/StagingArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/StagingArea.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/WorkingArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/WorkingArea.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,6 +28,9 @@
   &quot;associatedIndex&quot;: 3
 }</component>
   <component name="ProjectId" id="2rOEh4VxjRjQGBGWkao6mSJJb1x" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -68,11 +66,22 @@
       <option name="presentableId" value="Default" />
       <updated>1736421836901</updated>
       <workItem from="1736421837908" duration="4959000" />
-      <workItem from="1736509327385" duration="2864000" />
+      <workItem from="1736509327385" duration="4577000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/org/example/Repository.java</url>
+          <line>600</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

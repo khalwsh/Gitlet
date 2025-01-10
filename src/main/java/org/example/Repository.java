@@ -14,7 +14,7 @@ import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+
 public class Repository {
     private final File CWD;
     private final File Gitlet_Dir;
@@ -90,13 +90,13 @@ public class Repository {
 
     public void add(String fileName) {
         //check gitlet repo existence
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         //check file existense
         File currentFile = workingArea.checkFileExistense(fileName);
         if (currentFile == null) Utils.exitWithMessage("File doesn't exist");
 
 
-        String committedFileHash = getCurrentCommit().trackedFiles().get(fileName);
+        String committedFileHash = Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles().get(fileName);
         String workingFileHash = Utils.sha1(Utils.readContentsAsString(currentFile));
         if (!workingFileHash.equals(committedFileHash)) {
             stagingArea.stageForAddition(fileName, workingFileHash);
@@ -110,13 +110,13 @@ public class Repository {
 
     public void rm(String fileName) {
         //check gitlet repo existence
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         boolean checkFileStagedForAddition = stagingArea.CheckFileStagedForAddition(fileName);
 
 
         //check if file tracked or not
-        String fileHash = getCurrentCommit().trackedFiles().get(fileName);
+        String fileHash = Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles().get(fileName);
         if (fileHash == null) //untracked
         {
             if (checkFileStagedForAddition) stagingArea.UnStageForAddittion(fileName);
@@ -147,7 +147,7 @@ public class Repository {
                 Utils.exitWithMessage("No need to checkout the current branch.");
             } else {
                 //get list of all tracked files in both active and target branches
-                Map<String, String> trackedInActive = getCurrentCommit().trackedFiles();
+                Map<String, String> trackedInActive = Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles();
 
                 String commitHashInTarget = targetBranch.getReferredCommitHash();
                 Commit targetCommit = commitStore.getCommit(commitHashInTarget);
@@ -171,7 +171,7 @@ public class Repository {
                 }
                 ///must update fast forwarded branch pointer to point to same as the merged one head pointer still as it is
                 String targetHash = targetBranch.getReferredCommitHash();
-                Branch currentBranch = getCurrentBranch();
+                Branch currentBranch = Utilities.getCurrentBranch(branchStore , head);
                 currentBranch.SetCommit(targetHash);
                 branchStore.saveBranch(currentBranch);
             }
@@ -189,7 +189,7 @@ public class Repository {
             Utils.exitWithMessage("A branch with that name does not exist.");
         }
 
-        Branch currentBranch = getCurrentBranch();
+        Branch currentBranch = Utilities.getCurrentBranch(branchStore , head);
         if (targetBranch.getName().equals(currentBranch.getName())) {
             if (remoteName == null)
                 Utils.exitWithMessage("Cannot merge a branch with itself.");
@@ -198,7 +198,7 @@ public class Repository {
 
         final Commit HEAD_COMMIT = commitStore.getCommit(currentBranch.getReferredCommitHash());
         final Commit OTHER_COMMIT = commitStore.getCommit(targetBranch.getReferredCommitHash());
-        final Commit SPLIT_COMMIT = splitPoint(currentBranch, targetBranch, null);
+        final Commit SPLIT_COMMIT = Utilities.splitPoint(currentBranch, targetBranch, null , commitStore , remoteStore);
 
         if (SPLIT_COMMIT == null) {
             Utils.exitWithMessage("There is No common LCA");
@@ -292,9 +292,9 @@ public class Repository {
 
     public void log() {
         //check gitlet repo existence
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         //get current commit
-        Commit curCommit = getCurrentCommit();
+        Commit curCommit = Utilities.getCurrentCommit(commitStore , branchStore , head);
         ArrayList<Commit> listOfCommits = branchStore.getBranchHistory(curCommit, commitStore);
         for (int i = 0; i < listOfCommits.size(); i++) {
             System.out.println("===");
@@ -304,7 +304,7 @@ public class Repository {
     }
 
     public void logAll() {
-        List<Commit> commits = getCommitTree(getCurrentCommit(), null);
+        List<Commit> commits = Utilities.getCommitTree(Utilities.getCurrentCommit(commitStore , branchStore , head), null , commitStore , remoteStore);
         System.out.println(commits.size());
         for (int i = 0; i < commits.size(); i++) {
             System.out.println("===");
@@ -313,7 +313,7 @@ public class Repository {
     }
 
     public void globallog() {
-        checkGitletExistense(); // check repo is initialized
+        Utilities.checkGitletExistense(Gitlet_Dir);
         ArrayList<Commit> listOfCommits = commitStore.getAllCommitsHistory();
         for (int i = 0; i < listOfCommits.size(); i++) {
             System.out.println("===");
@@ -324,7 +324,7 @@ public class Repository {
 
     public void find(String Message) {
         // this function search throw all commits and return the hashes of the commits that has this message
-        checkGitletExistense(); // check repo is initialized
+        Utilities.checkGitletExistense(Gitlet_Dir);
         if (Message.isEmpty()) {
             Utils.exitWithMessage("incorrect operands");
         }
@@ -339,7 +339,7 @@ public class Repository {
     }
 
     public void commit(String Message) {
-        checkGitletExistense(); // check repo is initialized
+        Utilities.checkGitletExistense(Gitlet_Dir);
         commit(Message, null);
     }
 
@@ -349,7 +349,7 @@ public class Repository {
         if (stagingArea.IsEmpty()) Utils.exitWithMessage("nothing to commit");
 
 
-        String CurCommitHash = getCurrentCommit().getCommitHash();
+        String CurCommitHash = Utilities.getCurrentCommit(commitStore , branchStore , head).getCommitHash();
 
         Map<String, String> trackedFiles = commitStore.getCommit(CurCommitHash).trackedFiles();
 
@@ -364,15 +364,15 @@ public class Repository {
         Commit NewCommit = new Commit(new Date(), Message, SecondParentHash, CurCommitHash, trackedFiles);
         commitStore.saveCommit(NewCommit);
 
-        Branch CurBranch = getCurrentBranch();
+        Branch CurBranch = Utilities.getCurrentBranch(branchStore , head);
         CurBranch.SetCommit(NewCommit.getCommitHash());
         branchStore.saveBranch(CurBranch);
         stagingArea.clear();
     }
 
     public void CheckOutFile(String fileName) {
-        checkGitletExistense(); // check repo is initialized
-        String fileHashInHead = getCurrentCommit().trackedFiles().get(fileName);
+        Utilities.checkGitletExistense(Gitlet_Dir);
+        String fileHashInHead = Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles().get(fileName);
         if (fileHashInHead == null) Utils.exitWithMessage("File does not exist in that commit.");
         else {
             String blobContent = blobStore.getBlobContent(fileHashInHead);
@@ -381,7 +381,7 @@ public class Repository {
     }
 
     public void CheckOutFileByHash(String commitHash, String fileName) {
-        checkGitletExistense(); // check repo is initialized
+        Utilities.checkGitletExistense(Gitlet_Dir);
         Commit targetCommit = commitStore.getCommit(commitHash);
         if (targetCommit == null) Utils.exitWithMessage("No commit with that id exists.");
         else {
@@ -396,7 +396,7 @@ public class Repository {
     }
 
     public void CheckOutBranch(String branchName) {
-        checkGitletExistense(); // Ensure the repository is initialized
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         Branch targetBranch = branchStore.getBranch(branchName);
         if (targetBranch == null) {
@@ -409,7 +409,7 @@ public class Repository {
         }
 
         // Get the tracked files for the active and target branches
-        Map<String, String> trackedInActive = getCurrentCommit().trackedFiles();
+        Map<String, String> trackedInActive = Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles();
         Commit targetCommit = commitStore.getCommit(targetBranch.getReferredCommitHash());
         Map<String, String> trackedInTarget = targetCommit.trackedFiles();
 
@@ -465,11 +465,11 @@ public class Repository {
 
 
     public void branch(String targetBranchName) {
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         String activeBranch = head.getHead();
         if (activeBranch == targetBranchName) Utils.exitWithMessage("No need to checkout the current branch.");
         else {
-            String lastCommitHashInActive = getCurrentCommit().getCommitHash();
+            String lastCommitHashInActive = Utilities.getCurrentCommit(commitStore , branchStore , head).getCommitHash();
             branchStore.createNewBranch(targetBranchName, lastCommitHashInActive);
         }
     }
@@ -490,9 +490,7 @@ public class Repository {
     }
 
     public void status() {
-
-        // printing the branch names
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         System.out.println("=== Branches ===");
         String CurrentBranchName = head.getHead();
         for (String BranchName : branchStore.GetAllBranchesName()) {
@@ -531,7 +529,7 @@ public class Repository {
             }
         }
         // deleted: exist in last commit and not staged for delete and not exist in working tree
-        Commit LastCommit = getCurrentCommit();
+        Commit LastCommit = Utilities.getCurrentCommit(commitStore , branchStore , head);
         TreeSet<String> StagingAreaRem = (stagingArea.GetNameOfFilesForRemoval().length == 0 ? null : new TreeSet<>(Arrays.asList(stagingArea.GetNameOfFilesForRemoval())));
         TreeSet<String> WorkingTreeNames = new TreeSet<>(Arrays.asList(workingArea.NameOfFilesInWorkingArea()));
         for (Map.Entry<String, String> entry : LastCommit.trackedFiles().entrySet()) {
@@ -565,7 +563,7 @@ public class Repository {
     }
 
     public void reset(String commitHash) {
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         // Retrieve target commit
         Commit targetCommit = commitStore.getCommit(commitHash);
@@ -577,40 +575,40 @@ public class Repository {
         checkoutCommit(targetCommit);
 
         // Update the current branch to point to the target commit
-        Branch currentBranch = getCurrentBranch();
+        Branch currentBranch = Utilities.getCurrentBranch(branchStore , head);
         currentBranch.SetCommit(targetCommit.getCommitHash());
         branchStore.saveBranch(currentBranch);
     }
 
     public void addRemote(String remoteName, String remotePath) {
         //check if local and remote .gitlet folder exist
-        checkGitletExistense();
-        checkRemoteGitletExistenseAndPathValidity(remotePath);
+        Utilities.checkGitletExistense(Gitlet_Dir);
+        Utilities.checkRemoteGitletExistenseAndPathValidity(remotePath);
 
         remoteStore.addRemotePath(remoteName, remotePath);
     }
 
     public void removeRemote(String remoteName) {
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         remoteStore.removeRemotePath(remoteName);
     }
 
     public void push(String remoteName, String remoteBranchName) {
         //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         String remotePath = remoteStore.getRemotePath(remoteName);
         if (remotePath == null) Utils.exitWithMessage("Remote file is not exist");
-        checkRemoteGitletExistenseAndPathValidity(remotePath);
+        Utilities.checkRemoteGitletExistenseAndPathValidity(remotePath);
 
         Branch remoteBranch = remoteStore.getRemoteBranch(remoteName, remoteBranchName);
-        Branch curBranch = getCurrentBranch();
+        Branch curBranch = Utilities.getCurrentBranch(branchStore , head);
 
         final Commit HEAD_COMMIT = commitStore.getCommit(curBranch.getReferredCommitHash());
 
         final Commit OTHER_COMMIT = remoteStore.getRemoteCommit(remoteBranch.getReferredCommitHash(), remoteName);
 
-        final Commit SPLIT_COMMIT = splitPoint(curBranch, remoteBranch, remoteName);
+        final Commit SPLIT_COMMIT = Utilities.splitPoint(curBranch, remoteBranch, remoteName , commitStore , remoteStore);
 
         ///4 cases
         if (SPLIT_COMMIT == null) {
@@ -646,7 +644,7 @@ public class Repository {
                     (localCommitsPath.toString(), localBlobsPath.toString(), remoteCommitsPath.toString(), remoteBlobsPath.toString(), copies);
 
             //synchronize remote head pointer to current commit
-            FastForward(remoteName, remoteBranch);
+            Utilities.FastForward(remoteName, remoteBranch, branchStore , head ,commitStore , remoteStore);
         }
 
 
@@ -654,16 +652,16 @@ public class Repository {
 
     void fetch(String remoteName, String remoteBranchName) {
         //check existense of current gitlet =>existense of remote file=>existense of remote gitlet folder
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
         String remotePath = remoteStore.getRemotePath(remoteName);
         if (remotePath == null) Utils.exitWithMessage("Remote file is not exist");
-        checkRemoteGitletExistenseAndPathValidity(remotePath);
+        Utilities.checkRemoteGitletExistenseAndPathValidity(remotePath);
 
         ///check remote branch
         Branch remoteBranch = remoteStore.getRemoteBranch(remoteName, remoteBranchName);
         if (remoteBranch == null) Utils.exitWithMessage("That remote does not have that branch.");
         ////get local active branch history
-        ArrayList<Commit> listOfLocalCommits = branchStore.getBranchHistory(getCurrentCommit(), commitStore);
+        ArrayList<Commit> listOfLocalCommits = branchStore.getBranchHistory(Utilities.getCurrentCommit(commitStore , branchStore , head), commitStore);
         Map<String, Boolean> listOfLocalStoredCommits = new TreeMap<>();
         for (Commit commit : listOfLocalCommits) {
             listOfLocalStoredCommits.put(commit.getCommitHash(), true);
@@ -699,7 +697,7 @@ public class Repository {
 
     public void deleteRepo() {
         // validate Gitlet repository existence
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         // create a safety confirmation mechanism
         System.out.println("WARNING: You are about to permanently delete the entire Gitlet repository.");
@@ -792,10 +790,10 @@ public class Repository {
 
     public void rebase(String branchName) {
         // Check Gitlet repository existence
-        checkGitletExistense();
+        Utilities.checkGitletExistense(Gitlet_Dir);
 
         // Get current branch and target branch
-        Branch currentBranch = getCurrentBranch();
+        Branch currentBranch = Utilities.getCurrentBranch(branchStore , head);
         Branch targetBranch = branchStore.getBranch(branchName);
 
         if (targetBranch == null) {
@@ -803,11 +801,11 @@ public class Repository {
         }
 
         // Get commits for current and target branches
-        Commit currentCommit = getCurrentCommit();
+        Commit currentCommit = Utilities.getCurrentCommit(commitStore , branchStore , head);
         Commit targetCommit = commitStore.getCommit(targetBranch.getReferredCommitHash());
 
         // Find the split point
-        Commit splitCommit = splitPoint(currentBranch, targetBranch, null);
+        Commit splitCommit = Utilities.splitPoint(currentBranch, targetBranch, null , commitStore , remoteStore);
 
         if (splitCommit == null) {
             Utils.exitWithMessage("No common ancestor found.");
@@ -820,7 +818,7 @@ public class Repository {
         }
 
         // Check if target branch is ancestor of current branch
-        List<Commit> currentCommitHistory = getCommitTree(currentCommit, null);
+        List<Commit> currentCommitHistory = Utilities.getCommitTree(currentCommit, null , commitStore , remoteStore);
         if (currentCommitHistory.contains(targetCommit)) {
             Utils.exitWithMessage("Already up-to-date");
         }
@@ -901,87 +899,11 @@ public class Repository {
 
     }
 
-    private Commit splitPoint(Branch a, Branch b, String remoteName) {
-        Commit A = commitStore.getCommit(a.getReferredCommitHash());
-        Commit B;
-        if (remoteName != null) {
-            B = remoteStore.getRemoteCommit(b.getReferredCommitHash(), remoteName);
-        } else B = commitStore.getCommit(b.getReferredCommitHash());
-
-        Set<String> seta = getCommitTree(A, null).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
-        Set<String> setb = getCommitTree(B, remoteName).stream().map(Commit::getCommitHash).collect(Collectors.toSet());
-        Date LcaDate = new Date(0);
-        Commit Point = null;
-        for (String sa : seta) {
-            if (setb.contains(sa)) {
-                Commit x = commitStore.getCommit(sa);
-                if (!x.GetTime().before(LcaDate)) {
-                    LcaDate = x.GetTime();
-                    Point = x;
-                }
-            }
-        }
-        return Point;
-    }
-
-    private List<Commit> getCommitTree(Commit rootCommit, String remoteName) {
-        List<Commit> result = new ArrayList<>();
-        DFS(rootCommit, new HashSet<>(), result, remoteName);
-        return result;
-    }
-
-    private void DFS(Commit node, Set<String> visited, List<Commit> list, String remoteName) {
-        list.add(node);
-        visited.add(node.getCommitHash());
-
-        String primaryParent = node.getParentCommitHash();
-        String secondaryParent = node.getSecondryParent();
-
-        if (primaryParent != null && !visited.contains(primaryParent)) {
-            if (remoteName == null) DFS(commitStore.getCommit(primaryParent), visited, list, null);
-            else DFS(remoteStore.getRemoteCommit(primaryParent, remoteName), visited, list, remoteName);
-        }
-
-        if (secondaryParent != null && !visited.contains(secondaryParent)) {
-            if (remoteName == null) DFS(commitStore.getCommit(secondaryParent), visited, list, null);
-            else DFS(remoteStore.getRemoteCommit(secondaryParent, remoteName), visited, list, remoteName);
-        }
-    }
-
-    private void checkGitletExistense() {
-        if (!Gitlet_Dir.exists()) {
-            Utils.exitWithMessage("initialized Gitlet directory doesn't exist.");
-        }
-    }
-
-    private void checkRemoteGitletExistenseAndPathValidity(String remotePath) {
-        File remoteDir = new File(remotePath);
-        if (!remotePath.endsWith(".gitlet") || !remoteDir.isDirectory())
-            Utils.exitWithMessage("Remote directory not found.");
-    }
-
-    //get active branch
-    private Branch getCurrentBranch() {
-        return branchStore.getBranch(head.getHead());
-    }
-
-    //get current commit refered to by active branch
-    private Commit getCurrentCommit() {
-        String curCommitHash = getCurrentBranch().getReferredCommitHash();
-        return commitStore.getCommit(curCommitHash);
-    }
-
-    private void FastForward(String remoteName, Branch remoteBranch) {
-        String curCommitHash = getCurrentCommit().getCommitHash();
-        remoteBranch.SetCommit(curCommitHash);
-        remoteStore.saveRemoteBranch(remoteName, remoteBranch);
-    }
-
     private void checkoutCommit(Commit targetCommit) {
         // Check for untracked files that could be overwritten
         boolean hasUntrackedFiles = workingArea.allFiles().stream()
                 .map(File::getName)
-                .filter(fileName -> !getCurrentCommit().trackedFiles().containsKey(fileName))
+                .filter(fileName -> !Utilities.getCurrentCommit(commitStore , branchStore , head).trackedFiles().containsKey(fileName))
                 .anyMatch(fileName -> targetCommit.trackedFiles().containsKey(fileName));
 
         if (hasUntrackedFiles) {
