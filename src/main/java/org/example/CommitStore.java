@@ -16,14 +16,14 @@ public class CommitStore {
 
     public Set<String> GetCommitHashes() {
         File[] filesList = Commits_Dir.listFiles();
-          Set<String> set = new HashSet<>();
+        Set<String> set = new HashSet<>();
         for (File file : filesList) {
             set.add(file.getName());
         }
         return set;
-    
+
     }
-   
+
     public void saveCommit(Commit commit) {
         File currentCommitFile = Utils.join(Commits_Dir, commit.getCommitHash());
         Utils.writeObject(currentCommitFile, commit);

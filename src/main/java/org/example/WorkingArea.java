@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 public class WorkingArea {
     private final File Working_Dir;
     private final Path WORKING_DIR;
+
     public WorkingArea(File Working_Dir) {
         this.Working_Dir = Working_Dir;
         WORKING_DIR = Paths.get(Working_Dir.getAbsolutePath());
     }
+
     public List<File> allFiles() {
         // Assuming plainFilenamesIn returns a List<String>
         List<String> fileNames = plainFilenamesIn(WORKING_DIR);
@@ -26,6 +28,7 @@ public class WorkingArea {
                 .map(fileName -> WORKING_DIR.resolve(fileName).toFile())
                 .collect(Collectors.toList());
     }
+
     public void remove(String fileName) {
         // Construct the file object
         File file = Utils.join(Working_Dir, fileName);
@@ -43,6 +46,7 @@ public class WorkingArea {
             System.out.println("Successfully deleted file: " + file.getAbsolutePath());
         }
     }
+
     // Example definition of plainFilenamesIn
     private List<String> plainFilenamesIn(Path dir) {
         // Implementation to list file names in the directory
@@ -55,6 +59,7 @@ public class WorkingArea {
             return List.of();
         }
     }
+
     public File checkFileExistense(String fileName) {
         File targetFile = Utils.join(Working_Dir, fileName);
         return targetFile.exists() ? targetFile : null;
@@ -79,6 +84,7 @@ public class WorkingArea {
     public File getWorkingDir() {
         return Working_Dir;
     }
+
     public void Clear() {
         if (Working_Dir != null && Working_Dir.isDirectory()) {
             File[] files = Working_Dir.listFiles();
@@ -117,19 +123,17 @@ public class WorkingArea {
             System.out.println("Failed to delete directory: " + dir.getAbsolutePath());
         }
     }
+
     public String[] NameOfFilesInWorkingArea() {
-//        System.out.println(System.getProperty("user.dir"));
-//        System.out.println(Working_Dir.list());
-//        for (String fileName : Working_Dir.list()) {
-//            System.out.println(fileName);
-//        }
         return Working_Dir.list();
     }
+
     public boolean deleteFile(String fileName) {
         File file = getFile(fileName);
         if (file == null) return false;
         return file.delete();
     }
+
     public File getFile(String fileName) {
         File file = Utils.join(Working_Dir, fileName);
         return file.exists() ? file : null;

@@ -9,7 +9,7 @@ public class Main {
         if (args.length == 0) {
             Utils.exitWithMessage("Please Enter command.");
         }
-        String command =args[0];
+        String command = args[0];
 
         Repository repository = new Repository(System.getProperty("user.dir"));
 
@@ -38,9 +38,9 @@ public class Main {
                 repository.log();
                 break;
             case "log-all":
-                  ValidateArgs(0, args.length-1);
-                  repository.logAll();
-                  break;
+                ValidateArgs(0, args.length - 1);
+                repository.logAll();
+                break;
             case "global-log":
                 ValidateArgs(0, args.length - 1);
                 repository.globallog();
@@ -88,13 +88,13 @@ public class Main {
                 break;
             case "merge":
                 ValidateArgs(1, args.length - 1);
-                repository.merge(args[1],null);
+                repository.merge(args[1], null);
                 break;
             case "reset":
                 ValidateArgs(1, args.length - 1);
                 repository.reset(args[1]);
                 break;
-           case "add-remote":
+            case "add-remote":
 
                 ValidateArgs(2, args.length - 1);
                 repository.addRemote(args[1], args[2]);
@@ -109,11 +109,11 @@ public class Main {
                 break;
             case "fetch":
                 ValidateArgs(2, args.length - 1);
-                repository.fetch(args[1],args[2]);
+                repository.fetch(args[1], args[2]);
                 break;
             case "pull":
-                ValidateArgs(2, args.length-1);
-                repository.pull(args[1],args[2]);
+                ValidateArgs(2, args.length - 1);
+                repository.pull(args[1], args[2]);
 
             case "rebase":
                 ValidateArgs(1, args.length - 1);

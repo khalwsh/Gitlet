@@ -12,7 +12,7 @@ public class BlobStore {
     }
 
     public String saveBlob(File curFile) {
-        //get content of file(comin from working area) =>calculate hash=> serialize content=>store into blob
+        //get content of file(common from working area) =>calculate hash=> serialize content=>store into blob
 
         String fileContent = Utils.readContentsAsString(curFile);
 
@@ -31,10 +31,5 @@ public class BlobStore {
 
         return Utils.readContentsAsString(file);
     }
-    //   public boolean checkBlobHash(String hash)
-    //   {
-    //     File targetBlob=Utils.join(Blobs_Dir, hash);
-    //     return targetBlob.exists();
-    //   }
 
 }

@@ -4,49 +4,75 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8e974b21-3b78-4fa5-96e9-016edf7abd26" name="Changes" comment="" />
+    <list default="true" id="dcc5e801-05e1-456c-b8f0-4d61678b6f14" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BlobStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BlobStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BranchStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BranchStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Commit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Commit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/CommitStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/CommitStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/RemoteStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/RemoteStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Repository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Repository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/StagingArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/StagingArea.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/WorkingArea.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/WorkingArea.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
-  <component name="ProjectId" id="2rJ10WUo25TBLfs47QYRsRBuxra" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2rOEh4VxjRjQGBGWkao6mSJJb1x" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "Application.StagingArea.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "kotlin-language-version-configured": "true",
-    "onboarding.tips.debug.path": "E:/source/repos/Gitlet2/src/main/java/org/example/Main.java"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8e974b21-3b78-4fa5-96e9-016edf7abd26" name="Changes" comment="" />
-      <created>1736262143040</created>
+      <changelist id="dcc5e801-05e1-456c-b8f0-4d61678b6f14" name="Changes" comment="" />
+      <created>1736421836901</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1736262143040</updated>
+      <updated>1736421836901</updated>
+      <workItem from="1736421837908" duration="4959000" />
+      <workItem from="1736509327385" duration="2864000" />
     </task>
     <servers />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/org/example/Main.java</url>
-          <line>10</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>

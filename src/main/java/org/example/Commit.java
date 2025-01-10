@@ -1,16 +1,18 @@
 package org.example;
 
+import java.io.Serial;
 import java.util.*;
 import java.io.Serializable;
 public class Commit  implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     private Date timeStamp = new Date();
     private String message;
     private String secondryParentHash;
     private String parentHash;
     private String currentHash;
-    private Map<String, String> trackedFiles=new TreeMap<>() ;
-   
+    private Map<String, String> trackedFiles = new TreeMap<>();
+
     public Commit(Date timeStamp, String message, String secondryParentHash, String parentHash, Map<String, String> trackedFiles) {
 
         this.timeStamp = timeStamp;
@@ -37,13 +39,15 @@ public class Commit  implements Serializable {
         return Utils.sha1(itemList);
 
     }
- public Date GetTime(){
+
+    public Date GetTime() {
         return this.timeStamp;
     }
-   
-    public String getSecondryParent(){
+
+    public String getSecondryParent() {
         return secondryParentHash;
     }
+
     public String getCommitHash() {
         return currentHash;
     }
@@ -51,12 +55,15 @@ public class Commit  implements Serializable {
     public String getParentCommitHash() {
         return parentHash;
     }
+
     public TreeSet<String> getTrackedFilesSet() {
         return new TreeSet<>(trackedFiles.keySet());
     }
+
     public Map<String, String> trackedFiles() {
         return trackedFiles;
     }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -69,6 +76,7 @@ public class Commit  implements Serializable {
 
         return sb.toString();
     }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Commit) {
@@ -76,6 +84,7 @@ public class Commit  implements Serializable {
         }
         return false;
     }
+
     public String CommitMessage() {
         return this.message;
     }
