@@ -18,6 +18,8 @@
    - [rm-branch](#rm-branch)
    - [reset](#reset)
    - [merge](#merge)
+   - [rebase](#rebase)
+   - [delete-repo](#delete-repo)
    - [add-remote](#add-remote)
    - [rm-remote](#rm-remote)
    - [push](#push)
@@ -63,160 +65,61 @@ In Gitlet, we support branching and have different histories of commits derived 
 ## Gitlet Functionality
 
 ### <b>init</b>
-Creates a new Gitlet version-control system in the current directory.
-
-This system will automatically start with one commit: a commit that contains no files and has the commit message `initial commit` (just like that, with no punctuation).
-
-It will have a single branch: `master`, which initially points to this initial commit, and `master` will be the current branch.
-
-The timestamp for this initial commit will be `00:00:00 UTC, Thursday, 1 January 1970`. Since the initial commit in all repositories created by Gitlet will have exactly the same content, it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.
+   - Creates a new Gitlet version-control system in the current directory. This system will automatically start with one commit: a commit that contains no files and has the commit message `initial commit` (just like that, with no punctuation). It will have a single branch: `master`, which initially points to this initial commit, and `master` will be the current branch. The timestamp for this initial commit will be `00:00:00 UTC, Thursday, 1 January 1970`. Since the initial commit in all repositories created by Gitlet will have exactly the same content, it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.
 
 ### <b>add</b>
-Adds a copy of the file as it currently exists to the staging area.
-
-If the current working version of the file is identical to the version in the current commit, Gitlet will not stage it to be added.
+   - Adds a copy of the file as it currently exists to the staging area. If the current working version of the file is identical to the version in the current commit, Gitlet will not stage it to be added. This ensures that only changes are tracked, avoiding unnecessary duplication of files in the repository.
 
 ### <b>commit</b>
-Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
-
-The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files; it will keep versions of files exactly as they are, and not update them.
-
-A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit, in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
-
-A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent. Finally, files tracked in the current commit may be untracked in the new commit as a result of being staged for removal.
-
-The staging area is cleared after a commit.
-
-The commit command never adds, changes, or removes files in the working directory (other than those in the `.gitlet` directory). The `rm` command will remove such files, as well as staging them for removal, so that they will be untracked after a commit.
-
-Any changes made to files after staging for addition or removal are ignored by the commit command, which only modifies the contents of the `.gitlet` directory. For example, if you remove a tracked file using the Unix `rm` command (rather than Gitlet’s command of the same name), it has no effect on the next commit, which will still contain the (now deleted) version of the file.
-
-After the commit command, the new commit is added as a new node in the commit tree.
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/301bd84d-27aa-43e6-9636-3b9979b1a771" alt="Commit Tree">
-</p>
+   - Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit. The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files; it will keep versions of files exactly as they are, and not update them. A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit, in which case the commit will now include the version of the file that was staged instead of the version it got from its parent. A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent. Finally, files tracked in the current commit may be untracked in the new commit as a result of being staged for removal. The staging area is cleared after a commit.
 
 ### <b>rm</b>
-Unstage the file if it is currently staged for addition. If the file is tracked in the current commit, Gitlet stages it for removal and removes the file from the working directory if the user has not already done so.
+   - Unstage the file if it is currently staged for addition. If the file is tracked in the current commit, Gitlet stages it for removal and removes the file from the working directory if the user has not already done so. This ensures that the file is no longer tracked in the next commit.
 
 ### <b>log</b>
-Starting at the current head commit, display information about each commit backwards along the commit tree until the initial commit, but only consider the first parent in case more than one parent.
-
-Example:
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/be7bd817-28b1-481a-8429-e253c42dea86" alt="Log Example">
-</p>
-
-What the command does and gets:
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/5652cb54-338e-4990-84aa-9d19e8cb68ef" alt="Log Command">
-</p>
+   - Starting at the current head commit, display information about each commit backwards along the commit tree until the initial commit, but only consider the first parent in case more than one parent. This provides a linear history of the project, showing the sequence of changes made over time.
 
 ### <b>global-log</b>
-Like `log`, except displays information about all commits ever made. The order of the commits does not matter.
+   - Like `log`, except displays information about all commits ever made. The order of the commits does not matter. This is useful for finding specific commits across all branches in the repository.
 
 ### <b>find</b>
-Prints out the ids of all commits that have the given commit message, one per line. If there are multiple such commits, it prints the ids out on separate lines.
+   - Prints out the ids of all commits that have the given commit message, one per line. If there are multiple such commits, it prints the ids out on separate lines. This is helpful for locating specific changes based on commit messages.
 
 ### <b>status</b>
-Displays some statistics.
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/56a2a698-c74a-468d-ae95-baf19469fec2" alt="Status Example">
-</p>
+   - Displays some statistics about the current state of the repository, including the current branch, staged files, and untracked files. This provides a quick overview of the repository's status.
 
 ### <b>checkout</b>
-Takes the version of the file as it exists in the head commit and puts it in the working directory, overwriting the version of the file that’s already there if there is one. The new version of the file is not staged.
-
-Takes the version of the file as it exists in the commit with the given id, and puts it in the working directory, overwriting the version of the file that’s already there if there is one. The new version of the file is not staged.
-
-Takes all files in the commit at the head of the given branch, and puts them in the working directory, overwriting the versions of the files that are already there if they exist. Also, at the end of this command, the given branch will now be considered the current branch (HEAD). Any files that are tracked in the current branch but are not present in the checked-out branch are deleted. The staging area is cleared, unless the checked-out branch is the current branch.
+   - Takes the version of the file as it exists in the head commit and puts it in the working directory, overwriting the version of the file that’s already there if there is one. The new version of the file is not staged. This command can also be used to switch branches or restore files from specific commits.
 
 ### <b>branch</b>
-Creates a new branch with the given name, and points it at the current head commit. A branch is nothing more than a name for a reference (a SHA-1 identifier) to a commit node. This command does NOT immediately switch to the newly created branch (just as in real Git). Before you ever call `branch`, your code should be running with a default branch called “master”.
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/273e3724-5738-400d-958b-7ddbd0f40fa4" alt="Branch Example">
-</p>
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/04aa6ee8-9341-42b6-83c4-8c597d8374cb" alt="Branch Command">
-</p>
+   - Creates a new branch with the given name, and points it at the current head commit. A branch is nothing more than a name for a reference (a SHA-1 identifier) to a commit node. This command does NOT immediately switch to the newly created branch (just as in real Git). Before you ever call `branch`, your code should be running with a default branch called “master”.
 
 ### <b>rm-branch</b>
-Deletes the branch with the given name. This only means to delete the pointer associated with the branch; it does not mean to delete all commits that were created under the branch, or anything like that.
+   - Deletes the branch with the given name. This only means to delete the pointer associated with the branch; it does not mean to delete all commits that were created under the branch, or anything like that. This is useful for cleaning up unused branches.
 
 ### <b>reset</b>
-Checks out all the files tracked by the given commit. Removes tracked files that are not present in that commit. Also moves the current branch’s head to that commit node. See the intro for an example of what happens to the head pointer after using `reset`. The `[commit id]` may be abbreviated as for `checkout`. The staging area is cleared. The command is essentially `checkout` of an arbitrary commit that also changes the current branch head.
+   - Checks out all the files tracked by the given commit. Removes tracked files that are not present in that commit. Also moves the current branch’s head to that commit node. See the intro for an example of what happens to the head pointer after using `reset`. The `[commit id]` may be abbreviated as for `checkout`. The staging area is cleared. The command is essentially `checkout` of an arbitrary commit that also changes the current branch head.
 
 ### <b>merge</b>
-Merges files from the given branch into the current branch.
-
-Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch (checked out from the commit at the front of the given branch). These files should then all be automatically staged. To clarify, if a file is “modified in the given branch since the split point” this means the version of the file as it exists in the commit at the front of the given branch has different content from the version of the file at the split point. Remember: blobs are content addressable!
-
-Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are.
-
-Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge. If a file was removed from both the current and given branch, but a file of the same name is present in the working directory, it is left alone and continues to be absent (not tracked nor staged) in the merge.
-
-Any files that were not present at the split point and are present only in the current branch should remain as they are.
-
-Any files that were not present at the split point and are present only in the given branch should be checked out and staged.
-
-Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).
-
-Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.
-
-Any files modified in different ways in the current and given branches are in conflict. “Modified in different ways” can mean that the contents of both are changed and different from other, or the contents of one are changed and the other file is deleted, or the file was absent at the split point and has different contents in the given and current branches. In this case, replace the contents of the conflicted file with:
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/abb557a0-ee6f-4bec-9374-3259c32ee507" alt="Merge Conflict">
-</p>
-
-### <b>add-remote</b>
-Saves the given login information under the given remote name. Attempts to push or pull from the given remote name.
-
-### <b>rm-remote</b>
-Remove information associated with the given remote name. The idea here is that if you ever wanted to change a remote that you added, you would have to first remove it and then re-add it.
-
-### <b>push</b>
-Attempts to append the current branch’s commits to the end of the given branch at the given remote. Details:
-
-This command only works if the remote branch’s head is in the history of the current local head, which means that the local branch contains some commits in the future of the remote branch. In this case, append the future commits to the remote branch. Then, the remote should reset to the front of the appended commits (so its head will be the same as the local head). This is called fast-forwarding.
-
-If the Gitlet system on the remote machine exists but does not have the input branch, then simply add the branch to the remote Gitlet.
-
-### <b>fetch</b>
-Brings down commits from the remote Gitlet repository into the local Gitlet repository. Basically, this copies all commits and blobs from the given branch in the remote repository (that are not already in the current repository) into a branch named `[remote name]/[remote branch name]` in the local `.gitlet` (just as in real Git), changing `[remote name]/[remote branch name]` to point to the head commit (thus copying the contents of the branch from the remote repository to the current one). This branch is created in the local repository if it did not previously exist.
-
-### <b>pull</b>
-Fetches branch `[remote name]/[remote branch name]` as for the `fetch` command, and then merges that fetch into the current branch.
+   - Merges files from the given branch into the current branch. Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch (checked out from the commit at the front of the given branch). These files should then all be automatically staged. To clarify, if a file is “modified in the given branch since the split point” this means the version of the file as it exists in the commit at the front of the given branch has different content from the version of the file at the split point. Remember: blobs are content addressable!
 
 ### <b>rebase</b>
-Rebases the current branch onto the specified branch. This command replays all commits from the current branch onto the tip of the given branch, effectively creating a linear history.
-
-How it works:
-
-Identify the split point (the latest common commit) between the current branch and the target branch.
-
-Replay each commit from the current branch onto the target branch, creating new commits with the same changes but updated parent references.
-
-Move the current branch pointer to the last replayed commit.
-
-Behavior:
-
-If conflicts occur during the rebase process, Gitlet will pause and allow you to resolve them. After resolving conflicts, you can continue the rebase.
-
-If the target branch is not in the history of the current branch, Gitlet will abort the operation and notify the user.
+   - Rebases the current branch onto the specified branch. This command replays all commits from the current branch onto the tip of the given branch, effectively creating a linear history. Identify the split point (the latest common commit) between the current branch and the target branch. Replay each commit from the current branch onto the target branch, creating new commits with the same changes but updated parent references. Move the current branch pointer to the last replayed commit. If conflicts occur during the rebase process, Gitlet will pause and allow you to resolve them. After resolving conflicts, you can continue the rebase. If the target branch is not in the history of the current branch, Gitlet will abort the operation and notify the user.
 
 ### <b>delete-repo</b>
-Deletes the entire Gitlet repository, including all commits, branches, and staged files. This command is irreversible and removes all version control history associated with the project.
+  - Deletes the entire Gitlet repository, including all commits, branches, and staged files. This command is irreversible and removes all version control history associated with the project. Removes the `.gitlet` directory and all its contents from the current working directory. Clears any staged files, commit history, and branch information. If no Gitlet repository exists in the current directory, Gitlet will notify the user that there is nothing to delete. This command does not affect the working directory files (only the version control data).
 
-How it works:
+### <b>add-remote</b>
+   - Saves the given login information under the given remote name. Attempts to push or pull from the given remote name. This is useful for collaborating with remote repositories.
 
-Removes the .gitlet directory and all its contents from the current working directory.
+### <b>rm-remote</b>
+   - Remove information associated with the given remote name. The idea here is that if you ever wanted to change a remote that you added, you would have to first remove it and then re-add it.
 
-Clears any staged files, commit history, and branch information.
+### <b>push</b>
+   - Attempts to append the current branch’s commits to the end of the given branch at the given remote. This command only works if the remote branch’s head is in the history of the current local head, which means that the local branch contains some commits in the future of the remote branch. In this case, append the future commits to the remote branch. Then, the remote should reset to the front of the appended commits (so its head will be the same as the local head). This is called fast-forwarding. If the Gitlet system on the remote machine exists but does not have the input branch, then simply add the branch to the remote Gitlet.
 
-Behavior:
+### <b>fetch</b>
+   - Brings down commits from the remote Gitlet repository into the local Gitlet repository. Basically, this copies all commits and blobs from the given branch in the remote repository (that are not already in the current repository) into a branch named `[remote name]/[remote branch name]` in the local `.gitlet` (just as in real Git), changing `[remote name]/[remote branch name]` to point to the head commit (thus copying the contents of the branch from the remote repository to the current one). This branch is created in the local repository if it did not previously exist.
 
-If no Gitlet repository exists in the current directory, Gitlet will notify the user that there is nothing to delete.
-
-This command does not affect the working directory files (only the version control data).
+### <b>pull</b>
+   - Fetches branch `[remote name]/[remote branch name]` as for the `fetch` command, and then merges that fetch into the current branch. This is useful for updating your local branch with changes from the remote repository.
