@@ -467,7 +467,7 @@ public class Repository {
     public void branch(String targetBranchName) {
         Utilities.checkGitletExistense(Gitlet_Dir);
         String activeBranch = head.getHead();
-        if (activeBranch == targetBranchName) Utils.exitWithMessage("No need to checkout the current branch.");
+        if (activeBranch.equals(targetBranchName)) Utils.exitWithMessage("No need to checkout the current branch.");
         else {
             String lastCommitHashInActive = Utilities.getCurrentCommit(commitStore , branchStore , head).getCommitHash();
             branchStore.createNewBranch(targetBranchName, lastCommitHashInActive);
