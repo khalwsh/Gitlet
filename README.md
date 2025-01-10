@@ -1,5 +1,3 @@
-# Gitlet
-
 ## Table of Contents
 1. [Overview](#overview)
 2. [Dependencies](#dependencies)
